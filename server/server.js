@@ -17,6 +17,9 @@ app.use(cors({
 }));
 app.use(bodyParser.json());
 
+// Serve static files from parent directory
+app.use(express.static('../'));
+
 // Initialize SQLite database
 const db = new sqlite3.Database('./users.db', (err) => {
     if (err) {
