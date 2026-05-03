@@ -297,6 +297,102 @@
                 localStorage.setItem('theme', newTheme);
             };
 
+            // Language translations
+            const translations = {
+                en: {
+                    settings: 'Settings',
+                    manageAccount: 'Manage your account settings and preferences',
+                    searchPreferences: 'Search Preferences',
+                    defaultSearchType: 'Default Search Type',
+                    resultsPerPage: 'Results per page',
+                    autoSearch: 'Auto-search',
+                    autoSearchDesc: 'Automatically search as you type',
+                    showCitations: 'Show citations',
+                    showCitationsDesc: 'Display citations in search results',
+                    appearance: 'Appearance',
+                    theme: 'Theme',
+                    themeDesc: 'Choose between light and dark mode',
+                    fontSize: 'Font Size',
+                    language: 'Language',
+                    saveSettings: 'Save Settings',
+                    saving: 'Saving...',
+                    resetToDefault: 'Reset to Default',
+                    settingsSaved: 'Settings saved successfully!',
+                    settingsReset: 'Settings reset to default',
+                    confirmReset: 'Are you sure you want to reset all settings to default?'
+                },
+                es: {
+                    settings: 'Configuración',
+                    manageAccount: 'Administra la configuración y preferencias de tu cuenta',
+                    searchPreferences: 'Preferencias de Búsqueda',
+                    defaultSearchType: 'Tipo de Búsqueda Predeterminado',
+                    resultsPerPage: 'Resultados por página',
+                    autoSearch: 'Búsqueda automática',
+                    autoSearchDesc: 'Buscar automáticamente mientras escribes',
+                    showCitations: 'Mostrar citas',
+                    showCitationsDesc: 'Mostrar citas en los resultados de búsqueda',
+                    appearance: 'Apariencia',
+                    theme: 'Tema',
+                    themeDesc: 'Elige entre modo claro y oscuro',
+                    fontSize: 'Tamaño de Fuente',
+                    language: 'Idioma',
+                    saveSettings: 'Guardar Configuración',
+                    saving: 'Guardando...',
+                    resetToDefault: 'Restablecer Predeterminados',
+                    settingsSaved: '¡Configuración guardada exitosamente!',
+                    settingsReset: 'Configuración restablecida a predeterminados',
+                    confirmReset: '¿Estás seguro de que quieres restablecer toda la configuración a los valores predeterminados?'
+                },
+                fr: {
+                    settings: 'Paramètres',
+                    manageAccount: 'Gérez les paramètres et préférences de votre compte',
+                    searchPreferences: 'Préférences de Recherche',
+                    defaultSearchType: 'Type de Recherche par Défaut',
+                    resultsPerPage: 'Résultats par page',
+                    autoSearch: 'Recherche automatique',
+                    autoSearchDesc: 'Rechercher automatiquement pendant que vous tapez',
+                    showCitations: 'Afficher les citations',
+                    showCitationsDesc: 'Afficher les citations dans les résultats de recherche',
+                    appearance: 'Apparence',
+                    theme: 'Thème',
+                    themeDesc: 'Choisissez entre le mode clair et sombre',
+                    fontSize: 'Taille de Police',
+                    language: 'Langue',
+                    saveSettings: 'Enregistrer les Paramètres',
+                    saving: 'Enregistrement...',
+                    resetToDefault: 'Réinitialiser par Défaut',
+                    settingsSaved: 'Paramètres enregistrés avec succès!',
+                    settingsReset: 'Paramètres réinitialisés par défaut',
+                    confirmReset: 'Êtes-vous sûr de vouloir réinitialiser tous les paramètres aux valeurs par défaut?'
+                },
+                de: {
+                    settings: 'Einstellungen',
+                    manageAccount: 'Verwalten Sie Ihre Kontoeinstellungen und -präferenzen',
+                    searchPreferences: 'Sucheinstellungen',
+                    defaultSearchType: 'Standard-Suchtyp',
+                    resultsPerPage: 'Ergebnisse pro Seite',
+                    autoSearch: 'Automatische Suche',
+                    autoSearchDesc: 'Automatisch suchen während der Eingabe',
+                    showCitations: 'Zitate anzeigen',
+                    showCitationsDesc: 'Zitate in Suchergebnissen anzeigen',
+                    appearance: 'Erscheinungsbild',
+                    theme: 'Design',
+                    themeDesc: 'Wählen Sie zwischen hellem und dunklem Modus',
+                    fontSize: 'Schriftgröße',
+                    language: 'Sprache',
+                    saveSettings: 'Einstellungen speichern',
+                    saving: 'Speichern...',
+                    resetToDefault: 'Auf Standard zurücksetzen',
+                    settingsSaved: 'Einstellungen erfolgreich gespeichert!',
+                    settingsReset: 'Einstellungen auf Standard zurückgesetzt',
+                    confirmReset: 'Sind Sie sicher, dass Sie alle Einstellungen auf die Standardwerte zurücksetzen möchten?'
+                }
+            };
+
+            const t = (key) => {
+                return translations[settings.appearance.language]?.[key] || translations.en[key] || key;
+            };
+
             const saveSettings = async () => {
                 setSaving(true);
                 setSaveMessage('');
@@ -306,14 +402,14 @@
                     localStorage.setItem('userSettings', JSON.stringify(settings));
                     localStorage.setItem('theme', settings.appearance.theme);
                     setSaving(false);
-                    setSaveMessage('Settings saved successfully!');
+                    setSaveMessage(t('settingsSaved'));
                     
                     setTimeout(() => setSaveMessage(''), 3000);
                 }, 1000);
             };
 
             const resetSettings = () => {
-                if (confirm('Are you sure you want to reset all settings to default?')) {
+                if (confirm(t('confirmReset'))) {
                     const defaultSettings = {
                         searchPreferences: {
                             defaultSearchType: 'All Search',
@@ -340,7 +436,7 @@
                     };
                     setSettings(defaultSettings);
                     localStorage.setItem('userSettings', JSON.stringify(defaultSettings));
-                    setSaveMessage('Settings reset to default');
+                    setSaveMessage(t('settingsReset'));
                     setTimeout(() => setSaveMessage(''), 3000);
                 }
             };
@@ -489,14 +585,14 @@
                         <div className="max-w-4xl mx-auto p-6 lg:pt-20 pt-[72px]">
                             {/* Header */}
                             <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-6">
-                                <h1 className="text-2xl font-bold text-[#111827] mb-2">Settings</h1>
-                                <p className="text-gray-600">Manage your account settings and preferences</p>
+                                <h1 className="text-2xl font-bold text-[#111827] mb-2">{t('settings')}</h1>
+                                <p className="text-gray-600">{t('manageAccount')}</p>
                             </div>
 
                             {/* Save message */}
                             {saveMessage && (
                                 <div className={`mb-4 p-4 rounded-lg ${
-                                    saveMessage.includes('success') 
+                                    saveMessage.includes('success') || saveMessage.includes('successfully') || saveMessage.includes('éxito') || saveMessage.includes('succès') || saveMessage.includes('erfolgreich')
                                         ? 'bg-green-50 text-green-800 border border-green-200' 
                                         : 'bg-blue-50 text-blue-800 border border-blue-200'
                                 }`}>
@@ -506,12 +602,12 @@
 
                             {/* Search Preferences */}
                             <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-6">
-                                <h2 className="text-lg font-semibold text-[#111827] mb-4">Search Preferences</h2>
+                                <h2 className="text-lg font-semibold text-[#111827] mb-4">{t('searchPreferences')}</h2>
                                 
                                 <div className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Default Search Type
+                                            {t('defaultSearchType')}
                                         </label>
                                         <select
                                             value={settings.searchPreferences.defaultSearchType}
@@ -534,7 +630,7 @@
 
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Results per page
+                                            {t('resultsPerPage')}
                                         </label>
                                         <select
                                             value={settings.searchPreferences.resultsPerPage}
@@ -550,8 +646,8 @@
 
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <label className="text-sm font-medium text-gray-700">Auto-search</label>
-                                            <p className="text-sm text-gray-500">Automatically search as you type</p>
+                                            <label className="text-sm font-medium text-gray-700">{t('autoSearch')}</label>
+                                            <p className="text-sm text-gray-500">{t('autoSearchDesc')}</p>
                                         </div>
                                         <label className="toggle-switch">
                                             <input
@@ -565,8 +661,8 @@
 
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <label className="text-sm font-medium text-gray-700">Show citations</label>
-                                            <p className="text-sm text-gray-500">Display citations in search results</p>
+                                            <label className="text-sm font-medium text-gray-700">{t('showCitations')}</label>
+                                            <p className="text-sm text-gray-500">{t('showCitationsDesc')}</p>
                                         </div>
                                         <label className="toggle-switch">
                                             <input
@@ -582,13 +678,13 @@
 
                             {/* Appearance */}
                             <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-6">
-                                <h2 className="text-lg font-semibold text-[#111827] mb-4">Appearance</h2>
+                                <h2 className="text-lg font-semibold text-[#111827] mb-4">{t('appearance')}</h2>
                                 
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <label className="text-sm font-medium text-gray-700">Theme</label>
-                                            <p className="text-sm text-gray-500">Choose between light and dark mode</p>
+                                            <label className="text-sm font-medium text-gray-700">{t('theme')}</label>
+                                            <p className="text-sm text-gray-500">{t('themeDesc')}</p>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <span className="text-sm text-gray-600">☀️</span>
@@ -606,7 +702,7 @@
 
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Font Size
+                                            {t('fontSize')}
                                         </label>
                                         <select
                                             value={settings.appearance.fontSize}
@@ -621,7 +717,7 @@
 
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Language
+                                            {t('language')}
                                         </label>
                                         <select
                                             value={settings.appearance.language}
@@ -644,13 +740,13 @@
                                     disabled={saving}
                                     className="bg-[#2563eb] text-white px-6 py-3 rounded-lg hover:bg-blue-600 disabled:opacity-50"
                                 >
-                                    {saving ? 'Saving...' : 'Save Settings'}
+                                    {saving ? t('saving') : t('saveSettings')}
                                 </button>
                                 <button
                                     onClick={resetSettings}
                                     className="bg-gray-100 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-200"
                                 >
-                                    Reset to Default
+                                    {t('resetToDefault')}
                                 </button>
                             </div>
                         </div>
