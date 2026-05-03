@@ -137,31 +137,66 @@ class SearchService {
     // Semantic Scholar API
     async searchSemanticScholar(query) {
         try {
-            const url = 'https://api.semanticscholar.org/graph/v1/paper/search';
+            const apiKey = process.env.SEMANTIC_SCHOLAR_API_KEY;
+            let url = 'https://api.semanticscholar.org/graph/v1/paper/search';
             const params = new URLSearchParams({
                 query: query,
                 limit: 20,
                 fields: 'paperId,title,abstract,authors,year,url,venue,journal,doi,citationCount'
             });
 
-            const response = await axios.get(`${url}?${params}`);
-            
-            if (!response.data.data || !Array.isArray(response.data.data)) {
-                console.log('Semantic Scholar response structure:', JSON.stringify(response.data, null, 2));
-                return [];
+            const headers = {
+                'Accept': 'application/json'
+            };
+
+            // Add API key if available
+            if (apiKey) {
+                headers['x-api-key'] = apiKey;
             }
 
-            return response.data.data.map(paper => ({
-                source: 'Semantic Scholar',
-                id: paper.paperId || '',
-                title: paper.title || 'No title',
-                authors: Array.isArray(paper.authors) ? paper.authors.map(a => a.name).join(', ') : '',
-                abstract: paper.abstract || '',
-                journal: paper.venue || paper.journal?.name || '',
-                publicationDate: paper.year?.toString() || '',
-                url: paper.url || '',
-                doi: paper.doi || ''
-            }));
+            // Implement retry logic for rate limiting
+            let retries = 3;
+            let delay = 1000; // Start with 1 second delay
+
+            for (let attempt = 0; attempt < retries; attempt++) {
+                try {
+                    const response = await axios.get(`${url}?${params}`, { headers });
+                    
+                    if (!response.data.data || !Array.isArray(response.data.data)) {
+                        console.log('Semantic Scholar response structure:', JSON.stringify(response.data, null, 2));
+                        return [];
+                    }
+
+                    return response.data.data.map(paper => ({
+                        source: 'Semantic Scholar',
+                        id: paper.paperId || '',
+                        title: paper.title || 'No title',
+                        authors: Array.isArray(paper.authors) ? paper.authors.map(a => a.name).join(', ') : '',
+                        abstract: paper.abstract || '',
+                        journal: paper.venue || paper.journal?.name || '',
+                        publicationDate: paper.year?.toString() || '',
+                        url: paper.url || '',
+                        doi: paper.doi || ''
+                    }));
+                } catch (error) {
+                    if (error.response && error.response.status === 429) {
+                        console.log(`Semantic Scholar rate limited, attempt ${attempt + 1}/${retries}. Retrying in ${delay}ms...`);
+                        
+                        if (attempt < retries - 1) {
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            delay *= 2; // Exponential backoff
+                            continue;
+                        } else {
+                            console.log('Semantic Scholar is rate limited. All retries exhausted.');
+                            return [];
+                        }
+                    } else {
+                        throw error; // Re-throw non-429 errors
+                    }
+                }
+            }
+
+            return [];
         } catch (error) {
             console.error('Semantic Scholar API error:', error.message);
             if (error.response) {

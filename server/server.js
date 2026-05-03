@@ -181,11 +181,19 @@ app.post('/api/search', async (req, res) => {
 
         const results = await searchService.searchAll(query, selectedSources);
         
+        // Check if Semantic Scholar was included but returned no results due to rate limiting
+        const semanticScholarIncluded = selectedSources.includes('Semantic Scholar');
+        const semanticScholarResults = results.filter(r => r.source === 'Semantic Scholar');
+        const semanticScholarRateLimited = semanticScholarIncluded && semanticScholarResults.length === 0;
+
         res.json({
             query,
             sources: selectedSources,
             count: results.length,
-            results
+            results,
+            warnings: semanticScholarRateLimited ? [
+                'Semantic Scholar is currently rate limited. Results from this source are temporarily unavailable.'
+            ] : []
         });
     } catch (error) {
         console.error('Search error:', error);
