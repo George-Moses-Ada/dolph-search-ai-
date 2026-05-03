@@ -67,8 +67,16 @@
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('user', JSON.stringify(data.user));
 
-                    // Redirect to index.html
-                    window.location.href = 'index.html';
+                    // Check for pending search and redirect accordingly
+                    const pendingSearch = sessionStorage.getItem('pendingSearch');
+                    if (pendingSearch) {
+                        const { query, types } = JSON.parse(pendingSearch);
+                        sessionStorage.removeItem('pendingSearch'); // Clear the stored search
+                        window.location.href = `search-results.html?query=${encodeURIComponent(query)}&types=${encodeURIComponent(types)}`;
+                    } else {
+                        // Redirect to index.html if no pending search
+                        window.location.href = 'index.html';
+                    }
                 } catch (err) {
                     setError(err.message);
                 } finally {
