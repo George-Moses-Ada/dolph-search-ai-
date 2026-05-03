@@ -3,7 +3,7 @@ services:
   - type: web
     name: dolph-search-frontend
     env: static
-    buildCommand: npm install
+    buildCommand: ""
     staticPublishPath: .
     routes:
       - source: /
@@ -13,15 +13,14 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: API_URL
-        value: https://dolph-search-backend.onrender.com
 
   # Backend Service
   - type: web
     name: dolph-search-backend
     env: node
-    buildCommand: cd server && npm install
-    startCommand: cd server && node server.js
+    rootDirectory: server
+    buildCommand: npm install
+    startCommand: node server.js
     envVars:
       - key: NODE_ENV
         value: production
@@ -29,5 +28,4 @@ services:
         value: 10000
       - key: JWT_SECRET
         generateValue: true
-      - key: DATABASE_URL
-        value: file:./users.db
+
