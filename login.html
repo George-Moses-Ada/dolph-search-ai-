@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log in - Dolph Search</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="config.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function Login() {
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+            const [showPassword, setShowPassword] = useState(false);
+            const [loading, setLoading] = useState(false);
+            const [error, setError] = useState('');
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                setError('');
+
+                try {
+                    const response = await fetch(`${API_URL}/api/login`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email, password }),
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Login failed');
+                    }
+
+                    // Store token and user data
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+
+                    // Redirect to index.html
+                    window.location.href = 'index.html';
+                } catch (err) {
+                    setError(err.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+                    <div className="w-full max-w-md">
+                        {/* Logo */}
+                        <div className="flex items-center justify-center gap-2 mb-8">
+                            <img src="data:image/png;base64,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" className="w-9 h-9 rounded-lg" alt="Logo" />
+                            <span className="font-semibold text-xl">Dolph Search</span>
+                        </div>
+
+                        {/* Login card */}
+                        <div className="bg-white rounded-2xl shadow-lg p-8">
+                            <h1 className="text-2xl font-bold text-[#111827] mb-2">Welcome back</h1>
+                            <p className="text-sm text-[#6b7280] mb-6">Log in to get evidence-based answers from academic papers</p>
+
+                            {error && (
+                                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                    <p className="text-sm text-red-600">{error}</p>
+                                </div>
+                            )}
+
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-normal text-[#111827] mb-2">Email</label>
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="you@example.com"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-normal text-[#111827] mb-2">Password</label>
+                                    <div className="relative">
+                                        <input
+                                            type={showPassword ? 'text' : 'password'}
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12"
+                                            placeholder="••••••••"
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                        >
+                                            {showPassword ? (
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                                </svg>
+                                            ) : (
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                    <label className="flex items-center">
+                                        <input type="checkbox" className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                                        <span className="ml-2 text-sm text-[#6b7280]">Remember me</span>
+                                    </label>
+                                    <a href="#" className="text-sm text-[#2563eb] hover:underline">Forgot password?</a>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="w-full bg-[#2563eb] text-white py-3 rounded-lg text-sm font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {loading ? 'Logging in...' : 'Log in'}
+                                </button>
+                            </form>
+
+                            <div className="mt-6 text-center">
+                                <p className="text-sm text-[#6b7280]">
+                                    Don't have an account?{' '}
+                                    <a href="signup.html" className="text-[#2563eb] hover:underline font-medium">
+                                        Sign up for free
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Back to home */}
+                        <div className="mt-6 text-center">
+                            <a href="index.html" className="text-sm text-[#6b7280] hover:text-[#111827]">
+                                ← Back to home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<Login />, document.getElementById('root'));
+    </script>
+</body>
+</html>
