@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Dolph Search</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 24px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .toggle-slider {
+            background-color: #2563eb;
+        }
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function Settings() {
+            const [sidebarOpen, setSidebarOpen] = useState(false);
+            const [user, setUser] = useState(null);
+            const [settings, setSettings] = useState({
+                searchPreferences: {
+                    defaultSearchType: 'all',
+                    resultsPerPage: '20',
+                    autoSearch: true,
+                    showCitations: true
+                },
+                account: {
+                    emailNotifications: true,
+                    searchHistory: true,
+                    personalization: true,
+                    dataSharing: false
+                },
+                appearance: {
+                    theme: 'light',
+                    fontSize: 'medium',
+                    language: 'en'
+                },
+                privacy: {
+                    profileVisibility: 'private',
+                    dataRetention: '1year',
+                    analyticsTracking: true
+                }
+            });
+            const [saving, setSaving] = useState(false);
+            const [saveMessage, setSaveMessage] = useState('');
+
+            const handleLogout = () => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                setUser(null);
+            };
+
+            useEffect(() => {
+                // Load settings from localStorage
+                const savedSettings = localStorage.getItem('userSettings');
+                if (savedSettings) {
+                    setSettings(JSON.parse(savedSettings));
+                }
+
+                // Check if user is logged in
+                const userData = localStorage.getItem('user');
+                if (userData) {
+                    setUser(JSON.parse(userData));
+                }
+            }, []);
+
+            const handleSettingChange = (category, key, value) => {
+                setSettings(prev => ({
+                    ...prev,
+                    [category]: {
+                        ...prev[category],
+                        [key]: value
+                    }
+                }));
+            };
+
+            const saveSettings = async () => {
+                setSaving(true);
+                setSaveMessage('');
+                
+                // Simulate API call
+                setTimeout(() => {
+                    localStorage.setItem('userSettings', JSON.stringify(settings));
+                    setSaving(false);
+                    setSaveMessage('Settings saved successfully!');
+                    
+                    setTimeout(() => setSaveMessage(''), 3000);
+                }, 1000);
+            };
+
+            const resetSettings = () => {
+                if (confirm('Are you sure you want to reset all settings to default?')) {
+                    const defaultSettings = {
+                        searchPreferences: {
+                            defaultSearchType: 'all',
+                            resultsPerPage: '20',
+                            autoSearch: true,
+                            showCitations: true
+                        },
+                        account: {
+                            emailNotifications: true,
+                            searchHistory: true,
+                            personalization: true,
+                            dataSharing: false
+                        },
+                        appearance: {
+                            theme: 'light',
+                            fontSize: 'medium',
+                            language: 'en'
+                        },
+                        privacy: {
+                            profileVisibility: 'private',
+                            dataRetention: '1year',
+                            analyticsTracking: true
+                        }
+                    };
+                    setSettings(defaultSettings);
+                    localStorage.setItem('userSettings', JSON.stringify(defaultSettings));
+                    setSaveMessage('Settings reset to default');
+                    setTimeout(() => setSaveMessage(''), 3000);
+                }
+            };
+
+            return (
+                <div className="flex h-screen bg-white">
+                    {/* Sidebar */}
+                    <aside className={`
+                        fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[#f9f9f9] border-r border-[rgba(13,13,13,0.05)]
+                        transform transition-transform duration-300 ease-in-out
+                        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                    `}>
+                        <div className="flex flex-col h-full">
+                            {/* Logo */}
+                            <div className="flex items-center justify-between p-4 h-[52px]">
+                                <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.location.href = 'index.html'}>
+                                    <img src="data:image/png;base64,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" className="w-9 h-9 rounded-lg" alt="Logo" />
+                                    <span className="font-semibold text-base">Dolph Search</span>
+                                </div>
+                                <button
+                                    onClick={() => setSidebarOpen(false)}
+                                    className="lg:hidden p-2 hover:bg-gray-200 rounded-lg"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            {/* Navigation */}
+                            <nav className="flex-1 px-2 py-2">
+                            </nav>
+
+                            {/* Bottom section */}
+                            <div className="border-t border-[rgba(13,13,13,0.05)] p-2">
+                                <a href="plans.html" className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-200 rounded-lg text-left">
+                                    <svg className="w-5 h-5 text-[#0d0d0d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                    <span className="text-sm text-[#0d0d0d]">See plans and pricing</span>
+                                </a>
+
+                                <a href="settings.html" className="w-full flex items-center gap-2 px-3 py-2 bg-[#2563eb] text-white rounded-lg text-left">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    <span className="text-sm">Settings</span>
+                                </a>
+
+                                <a href="help.html" className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-200 rounded-lg text-left">
+                                    <svg className="w-5 h-5 text-[#0d0d0d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span className="text-sm text-[#0d0d0d]">Help</span>
+                                </a>
+
+                                {user ? (
+                                    <div className="mt-4 p-4 bg-white rounded-lg">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 bg-[#2563eb] rounded-full flex items-center justify-center">
+                                                <span className="text-white text-sm font-medium">{user.name.charAt(0).toUpperCase()}</span>
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="text-sm font-normal text-[#111827]">{user.name}</p>
+                                                <p className="text-xs text-[#6b7280]">{user.email}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="mt-4 p-4 bg-white rounded-lg">
+                                        <p className="text-sm font-normal text-[#0d0d0d] mb-2">Get responses tailored to you</p>
+                                        <p className="text-sm text-[#8f8f8f] mb-4">Log in to get answers based on your inputs, plus upload files.</p>
+                                        <a href="login.html" className="w-full bg-[#2563eb] text-white py-2 px-4 rounded-full text-sm hover:bg-blue-600 inline-block text-center">
+                                            Log in
+                                        </a>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </aside>
+
+                    {/* Mobile sidebar overlay */}
+                    {sidebarOpen && (
+                        <div
+                            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+                            onClick={() => setSidebarOpen(false)}
+                        />
+                    )}
+
+                    {/* Main content */}
+                    <main className="flex-1 flex flex-col overflow-hidden">
+                        {/* Header */}
+                        <header className="h-[52px] bg-white border-b border-gray-200 flex items-center justify-between px-4 sticky top-0 z-30">
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setSidebarOpen(true)}
+                                    className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                    </svg>
+                                </button>
+                                <a href="index.html" className="hidden lg:flex items-center gap-2 text-gray-600 hover:text-gray-900 px-2 py-1 rounded hover:bg-gray-100">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                    <span className="text-sm">Back</span>
+                                </a>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                {user ? (
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 bg-[#2563eb] rounded-full flex items-center justify-center">
+                                            <span className="text-white text-sm font-medium">{user.name.charAt(0).toUpperCase()}</span>
+                                        </div>
+                                        <span className="text-sm text-[#111827]">{user.name}</span>
+                                        <button onClick={handleLogout} className="text-sm text-[#6b7280] hover:text-[#111827]">
+                                            Log out
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <a href="login.html" className="bg-[#2563eb] text-white px-4 py-2 rounded-full text-sm hover:bg-blue-600">
+                                            Log in
+                                        </a>
+                                        <a href="signup.html" className="bg-white border border-gray-300 px-4 py-2 rounded-full text-sm hover:bg-gray-50">
+                                            Sign up for free
+                                        </a>
+                                    </>
+                                )}
+                            </div>
+                        </header>
+
+                        {/* Settings content */}
+                        <div className="flex-1 overflow-y-auto bg-gray-50">
+                            <div className="max-w-4xl mx-auto p-6">
+                                {/* Header */}
+                                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-6">
+                                    <h1 className="text-2xl font-bold text-[#111827] mb-2">Settings</h1>
+                                    <p className="text-gray-600">Manage your account settings and preferences</p>
+                                </div>
+
+                                {/* Save message */}
+                                {saveMessage && (
+                                    <div className={`mb-4 p-4 rounded-lg ${
+                                        saveMessage.includes('success') 
+                                            ? 'bg-green-50 text-green-800 border border-green-200' 
+                                            : 'bg-blue-50 text-blue-800 border border-blue-200'
+                                    }`}>
+                                        {saveMessage}
+                                    </div>
+                                )}
+
+                                {/* Search Preferences */}
+                                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-6">
+                                    <h2 className="text-lg font-semibold text-[#111827] mb-4">Search Preferences</h2>
+                                    
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Default Search Type
+                                            </label>
+                                            <select
+                                                value={settings.searchPreferences.defaultSearchType}
+                                                onChange={(e) => handleSettingChange('searchPreferences', 'defaultSearchType', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            >
+                                                <option value="all">All Search</option>
+                                                <option value="pubmed">PubMed</option>
+                                                <option value="arxiv">arXiv</option>
+                                                <option value="semantic">Semantic Scholar</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Results per page
+                                            </label>
+                                            <select
+                                                value={settings.searchPreferences.resultsPerPage}
+                                                onChange={(e) => handleSettingChange('searchPreferences', 'resultsPerPage', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            >
+                                                <option value="10">10</option>
+                                                <option value="20">20</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                            </select>
+                                        </div>
+
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <label className="text-sm font-medium text-gray-700">Auto-search</label>
+                                                <p className="text-sm text-gray-500">Automatically search as you type</p>
+                                            </div>
+                                            <label className="toggle-switch">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={settings.searchPreferences.autoSearch}
+                                                    onChange={(e) => handleSettingChange('searchPreferences', 'autoSearch', e.target.checked)}
+                                                />
+                                                <span className="toggle-slider"></span>
+                                            </label>
+                                        </div>
+
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <label className="text-sm font-medium text-gray-700">Show citations</label>
+                                                <p className="text-sm text-gray-500">Display citations in search results</p>
+                                            </div>
+                                            <label className="toggle-switch">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={settings.searchPreferences.showCitations}
+                                                    onChange={(e) => handleSettingChange('searchPreferences', 'showCitations', e.target.checked)}
+                                                />
+                                                <span className="toggle-slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Account Settings */}
+                                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-6">
+                                    <h2 className="text-lg font-semibold text-[#111827] mb-4">Account Settings</h2>
+                                    
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <label className="text-sm font-medium text-gray-700">Email notifications</label>
+                                                <p className="text-sm text-gray-500">Receive updates about your searches</p>
+                                            </div>
+                                            <label className="toggle-switch">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={settings.account.emailNotifications}
+                                                    onChange={(e) => handleSettingChange('account', 'emailNotifications', e.target.checked)}
+                                                />
+                                                <span className="toggle-slider"></span>
+                                            </label>
+                                        </div>
+
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <label className="text-sm font-medium text-gray-700">Search history</label>
+                                                <p className="text-sm text-gray-500">Save your search history</p>
+                                            </div>
+                                            <label className="toggle-switch">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={settings.account.searchHistory}
+                                                    onChange={(e) => handleSettingChange('account', 'searchHistory', e.target.checked)}
+                                                />
+                                                <span className="toggle-slider"></span>
+                                            </label>
+                                        </div>
+
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <label className="text-sm font-medium text-gray-700">Personalization</label>
+                                                <p className="text-sm text-gray-500">Personalize results based on your interests</p>
+                                            </div>
+                                            <label className="toggle-switch">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={settings.account.personalization}
+                                                    onChange={(e) => handleSettingChange('account', 'personalization', e.target.checked)}
+                                                />
+                                                <span className="toggle-slider"></span>
+                                            </label>
+                                        </div>
+
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <label className="text-sm font-medium text-gray-700">Data sharing</label>
+                                                <p className="text-sm text-gray-500">Share anonymized data to improve service</p>
+                                            </div>
+                                            <label className="toggle-switch">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={settings.account.dataSharing}
+                                                    onChange={(e) => handleSettingChange('account', 'dataSharing', e.target.checked)}
+                                                />
+                                                <span className="toggle-slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Appearance */}
+                                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-6">
+                                    <h2 className="text-lg font-semibold text-[#111827] mb-4">Appearance</h2>
+                                    
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Theme
+                                            </label>
+                                            <select
+                                                value={settings.appearance.theme}
+                                                onChange={(e) => handleSettingChange('appearance', 'theme', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            >
+                                                <option value="light">Light</option>
+                                                <option value="dark">Dark</option>
+                                                <option value="auto">Auto</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Font size
+                                            </label>
+                                            <select
+                                                value={settings.appearance.fontSize}
+                                                onChange={(e) => handleSettingChange('appearance', 'fontSize', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            >
+                                                <option value="small">Small</option>
+                                                <option value="medium">Medium</option>
+                                                <option value="large">Large</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Language
+                                            </label>
+                                            <select
+                                                value={settings.appearance.language}
+                                                onChange={(e) => handleSettingChange('appearance', 'language', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            >
+                                                <option value="en">English</option>
+                                                <option value="es">Español</option>
+                                                <option value="fr">Français</option>
+                                                <option value="de">Deutsch</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Privacy */}
+                                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-6">
+                                    <h2 className="text-lg font-semibold text-[#111827] mb-4">Privacy</h2>
+                                    
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Profile visibility
+                                            </label>
+                                            <select
+                                                value={settings.privacy.profileVisibility}
+                                                onChange={(e) => handleSettingChange('privacy', 'profileVisibility', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            >
+                                                <option value="private">Private</option>
+                                                <option value="public">Public</option>
+                                                <option value="friends">Friends only</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Data retention
+                                            </label>
+                                            <select
+                                                value={settings.privacy.dataRetention}
+                                                onChange={(e) => handleSettingChange('privacy', 'dataRetention', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            >
+                                                <option value="1month">1 month</option>
+                                                <option value="6months">6 months</option>
+                                                <option value="1year">1 year</option>
+                                                <option value="forever">Forever</option>
+                                            </select>
+                                        </div>
+
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <label className="text-sm font-medium text-gray-700">Analytics tracking</label>
+                                                <p className="text-sm text-gray-500">Help us improve with usage analytics</p>
+                                            </div>
+                                            <label className="toggle-switch">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={settings.privacy.analyticsTracking}
+                                                    onChange={(e) => handleSettingChange('privacy', 'analyticsTracking', e.target.checked)}
+                                                />
+                                                <span className="toggle-slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Action buttons */}
+                                <div className="flex gap-4">
+                                    <button
+                                        onClick={saveSettings}
+                                        disabled={saving}
+                                        className="bg-[#2563eb] text-white px-6 py-3 rounded-lg hover:bg-blue-600 disabled:opacity-50"
+                                    >
+                                        {saving ? 'Saving...' : 'Save Settings'}
+                                    </button>
+                                    <button
+                                        onClick={resetSettings}
+                                        className="bg-gray-100 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-200"
+                                    >
+                                        Reset to Default
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<Settings />, document.getElementById('root'));
+    </script>
+</body>
+</html>

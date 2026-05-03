@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History - Dolph Search</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function History() {
+            const [sidebarOpen, setSidebarOpen] = useState(false);
+            const [searchHistory, setSearchHistory] = useState([]);
+            const [searchTerm, setSearchTerm] = useState('');
+
+            useEffect(() => {
+                // Load search history from localStorage
+                const savedHistory = localStorage.getItem('searchHistory');
+                if (savedHistory) {
+                    setSearchHistory(JSON.parse(savedHistory));
+                } else {
+                    // Sample history data
+                    const sampleHistory = [
+                        {
+                            id: 1,
+                            query: "Intermittent fasting and metabolic health",
+                            types: ["All Search"],
+                            timestamp: new Date(Date.now() - 86400000),
+                            results: 15
+                        },
+                        {
+                            id: 2,
+                            query: "COVID-19 vaccine efficacy studies",
+                            types: ["PubMed"],
+                            timestamp: new Date(Date.now() - 172800000),
+                            results: 42
+                        },
+                        {
+                            id: 3,
+                            query: "Machine learning in medical diagnosis",
+                            types: ["arXiv"],
+                            timestamp: new Date(Date.now() - 259200000),
+                            results: 28
+                        },
+                        {
+                            id: 4,
+                            query: "Climate change impact on biodiversity",
+                            types: ["Semantic Scholar"],
+                            timestamp: new Date(Date.now() - 345600000),
+                            results: 67
+                        },
+                        {
+                            id: 5,
+                            query: "Artificial intelligence in healthcare",
+                            types: ["All Search"],
+                            timestamp: new Date(Date.now() - 432000000),
+                            results: 93
+                        }
+                    ];
+                    setSearchHistory(sampleHistory);
+                }
+            }, []);
+
+            const filteredHistory = searchHistory.filter(item =>
+                item.query.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+
+            const clearHistory = () => {
+                if (confirm('Are you sure you want to clear all search history?')) {
+                    setSearchHistory([]);
+                    localStorage.removeItem('searchHistory');
+                }
+            };
+
+            const deleteItem = (id) => {
+                const newHistory = searchHistory.filter(item => item.id !== id);
+                setSearchHistory(newHistory);
+                localStorage.setItem('searchHistory', JSON.stringify(newHistory));
+            };
+
+            const formatDate = (date) => {
+                const now = new Date();
+                const diff = now - date;
+                const days = Math.floor(diff / 86400000);
+                
+                if (days === 0) return 'Today';
+                if (days === 1) return 'Yesterday';
+                if (days < 7) return `${days} days ago`;
+                return date.toLocaleDateString();
+            };
+
+            return (
+                <div className="flex h-screen bg-white">
+                    {/* Sidebar */}
+                    <aside className={`
+                        fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[#f9f9f9] border-r border-[rgba(13,13,13,0.05)]
+                        transform transition-transform duration-300 ease-in-out
+                        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                    `}>
+                        <div className="flex flex-col h-full">
+                            {/* Logo */}
+                            <div className="flex items-center justify-between p-4 h-[52px]">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-9 h-9 bg-[rgba(158,169,251,0.13)] rounded-lg flex items-center justify-center">
+                                        <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none">
+                                            <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#2563EB" stroke="#2563EB" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
+                                            <path d="M2 17L12 22L22 17" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                            <path d="M2 12L12 17L22 12" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                            <circle cx="16" cy="8" r="2" fill="#DBEAFE"/>
+                                            <path d="M8 14C8 14 10 16 12 16C14 16 16 14 16 14" stroke="#434348" strokeWidth="1.5" strokeLinecap="round"/>
+                                            <circle cx="9" cy="10" r="1" fill="#434348"/>
+                                            <circle cx="15" cy="10" r="1" fill="#434348"/>
+                                        </svg>
+                                    </div>
+                                    <span className="font-semibold text-base">Dolph Search</span>
+                                </div>
+                                <button
+                                    onClick={() => setSidebarOpen(false)}
+                                    className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            {/* Navigation */}
+                            <nav className="flex-1 p-4">
+                                <a href="new-chat.html" className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-200 rounded-lg text-left">
+                                    <svg className="w-5 h-5 text-[#0d0d0d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                    </svg>
+                                    <span className="text-sm text-[#0d0d0d]">New Chat</span>
+                                </a>
+
+                                <a href="history.html" className="w-full flex items-center gap-2 px-3 py-2 bg-[#e3e8ef] rounded-lg text-left">
+                                    <svg className="w-5 h-5 text-[#0d0d0d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span className="text-sm text-[#0d0d0d]">History</span>
+                                </a>
+
+                                <a href="images.html" className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-200 rounded-lg mt-1">
+                                    <svg className="w-5 h-5 text-[#0d0d0d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <span className="text-sm text-[#0d0d0d]">Images</span>
+                                </a>
+                            </nav>
+
+                            {/* Bottom section */}
+                            <div className="border-t border-[rgba(13,13,13,0.05)] p-2">
+                                <a href="plans.html" className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-200 rounded-lg text-left">
+                                    <svg className="w-5 h-5 text-[#0d0d0d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                    <span className="text-sm text-[#0d0d0d]">See plans and pricing</span>
+                                </a>
+
+                                <a href="settings.html" className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-200 rounded-lg text-left">
+                                    <svg className="w-5 h-5 text-[#0d0d0d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    <span className="text-sm text-[#0d0d0d]">Settings</span>
+                                </a>
+
+                                <a href="help.html" className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-200 rounded-lg text-left">
+                                    <svg className="w-5 h-5 text-[#0d0d0d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span className="text-sm text-[#0d0d0d]">Help</span>
+                                </a>
+
+                                <div className="mt-4 p-4 bg-white rounded-lg">
+                                    <p className="text-sm font-bold text-[#0d0d0d] mb-2">Get responses tailored to you</p>
+                                    <p className="text-sm text-[#8f8f8f] mb-4">Log in to get answers based on your inputs, plus upload files.</p>
+                                    <a href="login.html" className="w-full bg-[#2563eb] text-white py-2 px-4 rounded-full text-sm hover:bg-blue-600 inline-block text-center">
+                                        Log in
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+
+                    {/* Mobile sidebar overlay */}
+                    {sidebarOpen && (
+                        <div
+                            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+                            onClick={() => setSidebarOpen(false)}
+                        />
+                    )}
+
+                    {/* Main content */}
+                    <main className="flex-1 flex flex-col overflow-hidden">
+                        {/* Header */}
+                        <header className="h-[52px] bg-white border-b border-gray-200 flex items-center justify-between px-4 sticky top-0 z-30">
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setSidebarOpen(true)}
+                                    className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                    </svg>
+                                </button>
+                                <a href="dolph-search.html" className="hidden lg:flex items-center gap-2 text-gray-600 hover:text-gray-900 px-2 py-1 rounded hover:bg-gray-100">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                    <span className="text-sm">Back</span>
+                                </a>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <a href="login.html" className="bg-[#2563eb] text-white px-4 py-2 rounded-full text-sm hover:bg-blue-600">
+                                    Log in
+                                </a>
+                                <a href="signup.html" className="bg-white border border-gray-300 px-4 py-2 rounded-full text-sm hover:bg-gray-50">
+                                    Sign up for free
+                                </a>
+                            </div>
+                        </header>
+
+                        {/* History content */}
+                        <div className="flex-1 overflow-y-auto bg-gray-50">
+                            <div className="max-w-4xl mx-auto p-6">
+                                <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-6">
+                                    <h1 className="text-2xl font-bold text-[#111827] mb-2">Search History</h1>
+                                    <p className="text-gray-600 mb-4">Your recent searches and research queries</p>
+                                    
+                                    {/* Search bar */}
+                                    <div className="flex gap-3 mb-4">
+                                        <input
+                                            type="text"
+                                            placeholder="Search your history..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                        <button
+                                            onClick={clearHistory}
+                                            className="bg-red-50 text-red-600 px-4 py-2 rounded-lg hover:bg-red-100 border border-red-200"
+                                        >
+                                            Clear All
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* History items */}
+                                {filteredHistory.length > 0 ? (
+                                    <div className="space-y-3">
+                                        {filteredHistory.map(item => (
+                                            <div key={item.id} className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow">
+                                                <div className="flex items-start justify-between">
+                                                    <div className="flex-1">
+                                                        <h3 className="font-semibold text-[#111827] mb-1 cursor-pointer hover:text-blue-600">
+                                                            {item.query}
+                                                        </h3>
+                                                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                                                            <span>{item.types ? item.types.join(', ') : 'All Search'}</span>
+                                                            <span>{item.results} results</span>
+                                                            <span>{formatDate(item.timestamp)}</span>
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => deleteItem(item.id)}
+                                                        className="text-gray-400 hover:text-red-600 p-1"
+                                                    >
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-12 text-center">
+                                        <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <h3 className="text-lg font-semibold text-gray-600 mb-2">No search history</h3>
+                                        <p className="text-gray-500 mb-4">Start searching to see your history here</p>
+                                        <a href="dolph-search.html" className="bg-[#2563eb] text-white px-6 py-2 rounded-lg hover:bg-blue-600 inline-block">
+                                            Start Searching
+                                        </a>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<History />, document.getElementById('root'));
+    </script>
+</body>
+</html>
