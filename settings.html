@@ -135,7 +135,7 @@
             const [user, setUser] = useState(null);
             const [settings, setSettings] = useState({
                 searchPreferences: {
-                    defaultSearchType: 'all',
+                    defaultSearchType: 'All Search',
                     resultsPerPage: '20',
                     autoSearch: true,
                     showCitations: true
@@ -220,7 +220,7 @@
                 if (confirm('Are you sure you want to reset all settings to default?')) {
                     const defaultSettings = {
                         searchPreferences: {
-                            defaultSearchType: 'all',
+                            defaultSearchType: 'All Search',
                             resultsPerPage: '20',
                             autoSearch: true,
                             showCitations: true
@@ -422,10 +422,17 @@
                                             onChange={(e) => handleSettingChange('searchPreferences', 'defaultSearchType', e.target.value)}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         >
-                                            <option value="all">All Search</option>
-                                            <option value="pubmed">PubMed</option>
-                                            <option value="arxiv">arXiv</option>
-                                            <option value="semantic">Semantic Scholar</option>
+                                            <option value="All Search">All Search</option>
+                                            <option value="PubMed">PubMed</option>
+                                            <option value="arXiv">arXiv</option>
+                                            <option value="Semantic Scholar">Semantic Scholar</option>
+                                            <option value="Europe PMC">Europe PMC</option>
+                                            <option value="CrossRef">CrossRef</option>
+                                            <option value="Scopus">Scopus</option>
+                                            <option value="Nature">Nature</option>
+                                            <option value="Cell">Cell</option>
+                                            <option value="JAMA">JAMA</option>
+                                            <option value="NEJM">NEJM</option>
                                         </select>
                                     </div>
 
