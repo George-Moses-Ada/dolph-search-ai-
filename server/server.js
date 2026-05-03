@@ -12,7 +12,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this-in-pro
 
 // Middleware
 app.use(cors({
-    origin: ['https://dolph-search-ai.onrender.com', 'http://localhost:3000', 'http://localhost:8080'],
+    origin: ['https://george-moses-ada.github.io', 'https://dolph-search-ai.onrender.com', 'http://localhost:3000', 'http://localhost:8080'],
     credentials: true
 }));
 app.use(bodyParser.json());
