@@ -118,6 +118,38 @@
 
                             {/* Bottom section */}
                             <div className="border-t border-[rgba(13,13,13,0.05)] p-2">
+                                {user ? (
+                                    <>
+                                        <div className="w-full flex items-center gap-2 px-3 py-2 text-left">
+                                            <div className="w-8 h-8 bg-[#2563eb] rounded-full flex items-center justify-center">
+                                                <span className="text-white text-sm font-medium">{user.name.charAt(0).toUpperCase()}</span>
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="text-sm font-medium text-[#0d0d0d]">{user.name}</div>
+                                                <button onClick={handleLogout} className="text-xs text-[#6b7280] hover:text-[#111827]">
+                                                    Log out
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="border-t border-[rgba(13,13,13,0.05)] my-2"></div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <a href="login.html" className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-200 rounded-lg text-left">
+                                            <svg className="w-5 h-5 text-[#0d0d0d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                            </svg>
+                                            <span className="text-sm text-[#0d0d0d]">Log in</span>
+                                        </a>
+                                        <a href="signup.html" className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-200 rounded-lg text-left">
+                                            <svg className="w-5 h-5 text-[#0d0d0d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                            </svg>
+                                            <span className="text-sm text-[#0d0d0d]">Sign up</span>
+                                        </a>
+                                        <div className="border-t border-[rgba(13,13,13,0.05)] my-2"></div>
+                                    </>
+                                )}
                                 <a href="plans.html" className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-200 rounded-lg text-left">
                                     <svg className="w-5 h-5 text-[#0d0d0d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -186,12 +218,16 @@
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                                     </svg>
                                 </button>
+                                <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.location.href = 'index.html'}>
+                                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJAAAACQCAYAAADnRuK4AAAACXBIWXMAACxLAAAsSwGlPZapAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAOdEVYdFNvZnR3YXJlAEZpZ21hnrGWYwAAHXtJREFUeAHtXQmQHNV5/rvnvvfe1e6iE3QsIIFkswsyBgNSsDkC4UgMdmE5tqm4AnLZlYrLNilVOY5dEMeRTRxBnMjBMo4BGQIEg0QiWxiQBBiQxOpCWh0rdle72mNmd3bO7ry/Z3p2jn59TffszOx8VV27M93TMz3z9f9///HeY2AWwfM8S/44yWYlmyP915rebYUassGRLZH1N0q2GG4Mw3AwS2CghEgTxk42N9k8UCOJUYiltylCpjCUECUhECEOWhkfpIjDQg2mYWAcuA/7IHx8AkIbPsVEwGSYRqC0tQmQzQ8aSDM0QbZBgHHyN2Lw5TsNP1DhNGrO4wBVwFM5nKlz4hYIzDyPwK9qIv3dDQ6l/p+cgoTXAmN3381MgkkwnEBaiHPkFMDRI+Tio8aTZS5AJKgzTUIkGAqjSN7Nl0hCoi0AE5/5DBMEg2EogQh50EU1goy22b2P3CVDNcLMBpBIRlskQwhEiIOEaQaK8T9FCLNvX4005QJrAsJHj8L5TZuYBBSJoglEyIPuqg4k3NUR4p727YcayhAWC3C2JJwv1hrpJlBa69RDSuvkAIXw7t01i1MJ4KcheN99zHnQCV0ESrusVkjldHLwwo5UBFVD5YAnOaS+XhjS49I0EyhNnnmQJ5RR56DVqaEygQL79BEY0EoiTQSikWfH7lRkVUNlQw+JVBOIRp6ay6ouaCWRKgLRyPP0CzWhXI3QQiK1JQYUzDXyzBFYLWBd1AWtmzbxivxQPIBYH8ws50RbNfJUP1xOsC9aKaRpZCHrwgh5vJDKMGfw9I5UraWGykDnPPA3NyY7XS6Lz26HThsLfqeT72KyfvmpaWbP4Eew94Pj0I+Ps4vAXiucl6uhUQmU1j0dkGWlatFWZaDnsmRPQ6PlBo+b72FZ6CJZZxAJw1B+8QRRO+EI88zxPvjx8VMpIiEwY33ADWc3fUpaD8kRCHWPW3yMxNlRy/OUNZA4bW2WB10uvgdJowfxOEBoktn8f6/DZvG5aBwin7+DGZA6XpJAUq7rF09DDWUKdFOXXwrf8Xr4O/USJxsch6mZXBIRrzZ0662F3Y40EZ0jnlD31FCeuOZKWHfVx/ndAb8x5EEQtwd1AX7j1d1wh/jcFAeNUlFZwRPp6nomZMfCaE00lx/Q6ty0jn+kYx7/GBHHfjAYAon8/EPzW4RWZLCwYF21qvB9pCxQzkE7atan7IBap2cN/2KdH+5gdXSY83xq4xTGciAxF18IX8w89kMg3wpZc08saJ/Mc/tPQQ1lhhuvg4fqA+wGte4qmQQ4fY6Dt47FYHwKoCnxVvDAxGr/kf6ksP+WbgfcebUDbBI9pBix+Tz8BqeDEbRQMgHsqmsEAzMuHpP/shzt8/4+qKFMcPES6LzoInjY4+F7GBUFqNEgD1t3RuCFvREYGEuZGnvsNNSNPuc/19aVOe6d43F4+1gcHv6SF91UAWw28F+6AroPHIK9wjk4od89Q6DMS9JDbzKEOlXL95QNPtEN6y6+mH/R61UmD7qll/bFYP13xuDxl8MZ8iC8wZdhynt14fkvc8Dxs9L+DF2kxw09+D827VutwO7axWdSjdkWyJv9wn0166MLaCnqm2CFg2R9SUa3w8LwAYuN6RD3MzzvJyTI6EwOGCFpxyUgOB3lDk1OsXtO98Oh/gEIolC+ZAVsbKjjN6jROueJ1XngpyHBquTDE94XdEYO+0ebvlKwb0m7FSZjnKCLpAjqcvBdYsYHs9S+BkFYC8WsbAJ5sl9Uq3UpA8nS3AbdPg+scDqI" className="w-8 h-8" alt="Dolph Search Logo" />
+                                    <span className="font-semibold text-base text-gray-900">Dolph Search</span>
+                                </div>
                             </div>
                             <div className="flex-1" />
 
                             <div className="flex items-center gap-2">
                                 {user ? (
-                                    <div className="flex items-center gap-3">
+                                    <div className="hidden lg:flex items-center gap-3">
                                         <div className="w-8 h-8 bg-[#2563eb] rounded-full flex items-center justify-center">
                                             <span className="text-white text-sm font-medium">{user.name.charAt(0).toUpperCase()}</span>
                                         </div>
