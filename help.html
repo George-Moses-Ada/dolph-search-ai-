@@ -217,6 +217,22 @@
                         {/* Header */}
                         <header className="lg:relative fixed top-0 left-0 right-0 h-[52px] bg-white border-b border-gray-200 flex items-center justify-between px-4 z-30">
                             <div className="flex items-center gap-2">
+                                <div className="lg:hidden flex items-center gap-2 cursor-pointer" onClick={() => window.location.href = 'index.html'}>
+                                    <div className="w-8 h-8 bg-[#2563eb] rounded-full flex items-center justify-center">
+                                        <span className="text-white text-sm font-bold">D</span>
+                                    </div>
+                                    <span className="font-semibold text-base text-gray-900">Dolph Search</span>
+                                </div>
+                                <a href="index.html" className="hidden lg:flex items-center gap-2 text-gray-600 hover:text-gray-900 px-2 py-1 rounded hover:bg-gray-100">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                    <span className="text-sm">Back</span>
+                                </a>
+                            </div>
+                            <div className="flex-1" />
+
+                            <div className="flex items-center gap-2">
                                 <button
                                     onClick={() => setSidebarOpen(true)}
                                     className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
@@ -225,17 +241,8 @@
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                                     </svg>
                                 </button>
-                                <a href="index.html" className="hidden lg:flex items-center gap-2 text-gray-600 hover:text-gray-900 px-2 py-1 rounded hover:bg-gray-100">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                    </svg>
-                                    <span className="text-sm">Back</span>
-                                </a>
-                            </div>
-
-                            <div className="flex items-center gap-2">
                                 {user ? (
-                                    <div className="flex items-center gap-3">
+                                    <div className="hidden lg:flex items-center gap-3">
                                         <div className="w-8 h-8 bg-[#2563eb] rounded-full flex items-center justify-center">
                                             <span className="text-white text-sm font-medium">{user.name.charAt(0).toUpperCase()}</span>
                                         </div>
@@ -246,10 +253,10 @@
                                     </div>
                                 ) : (
                                     <>
-                                        <a href="login.html" className="bg-[#2563eb] text-white px-4 py-2 rounded-full text-sm hover:bg-blue-600">
+                                        <a href="login.html" className="hidden lg:flex bg-[#2563eb] text-white px-4 py-2 rounded-full text-sm hover:bg-blue-600">
                                             Log in
                                         </a>
-                                        <a href="signup.html" className="bg-white border border-gray-300 px-4 py-2 rounded-full text-sm hover:bg-gray-50">
+                                        <a href="signup.html" className="hidden lg:flex bg-white border border-gray-300 px-4 py-2 rounded-full text-sm hover:bg-gray-50">
                                             Sign up for free
                                         </a>
                                     </>
