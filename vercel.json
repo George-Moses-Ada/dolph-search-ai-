@@ -2,10 +2,10 @@
   "version": 2,
   "builds": [
     {
-      "src": "index.html",
+      "src": "**/*",
       "use": "@vercel/static",
       "config": {
-        "distDir": ""
+        "distDir": "."
       }
     }
   ],
@@ -15,8 +15,16 @@
       "dest": "https://dolph-search-ai.onrender.com/api/$1"
     },
     {
+      "src": "/(login|signup|settings|help|plans|search-results|images|history|new-chat)",
+      "dest": "/$1.html"
+    },
+    {
+      "src": "/",
+      "dest": "/index.html"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/$1"
+      "dest": "/$1.html"
     }
   ]
 }
