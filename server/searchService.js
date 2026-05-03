@@ -89,7 +89,7 @@ class SearchService {
                 headers: { 'Accept': 'application/xml' }
             });
 
-            return this.parseArXivResponse(response.data);
+            return await this.parseArXivResponse(response.data);
         } catch (error) {
             console.error('arXiv API error:', error.message);
             return [];
@@ -97,34 +97,41 @@ class SearchService {
     }
 
     parseArXivResponse(xmlString) {
-        const parser = require('xml2js');
+        const xml2js = require('xml2js');
         let results = [];
 
-        parser.parseString(xmlString, (err, result) => {
-            if (err) return;
+        return new Promise((resolve) => {
+            xml2js.parseString(xmlString, (err, result) => {
+                if (err) {
+                    console.error('XML parsing error:', err);
+                    resolve([]);
+                    return;
+                }
 
-            const entries = result['feed']['entry'];
-            const entriesArray = Array.isArray(entries) ? entries : [entries];
+                const entries = result.feed?.entry || [];
+                const entriesArray = Array.isArray(entries) ? entries : [entries];
 
-            results = entriesArray.map(entry => {
-                const authors = entry['author'] || [];
-                const authorList = Array.isArray(authors) ? authors : [authors];
+                results = entriesArray.map(entry => {
+                    const authors = entry.author || [];
+                    const authorList = Array.isArray(authors) ? authors : [authors];
+                    const entryId = Array.isArray(entry.id) ? entry.id[0] : entry.id;
 
-                return {
-                    source: 'arXiv',
-                    id: entry['id']?.split('/').pop() || '',
-                    title: entry['title']?.[0] || 'No title',
-                    authors: authorList.map(a => a['name']?.[0] || '').join(', '),
-                    abstract: entry['summary']?.[0] || '',
-                    journal: 'arXiv',
-                    publicationDate: entry['published']?.[0]?.split('T')[0] || '',
-                    url: entry['id']?.[0] || '',
-                    doi: entry['arxiv:doi']?.[0] || ''
-                };
+                    return {
+                        source: 'arXiv',
+                        id: entryId?.split('/').pop() || '',
+                        title: Array.isArray(entry.title) ? entry.title[0] : (entry.title || 'No title'),
+                        authors: authorList.map(a => a.name?.[0] || '').join(', '),
+                        abstract: Array.isArray(entry.summary) ? entry.summary[0] : (entry.summary || ''),
+                        journal: 'arXiv',
+                        publicationDate: Array.isArray(entry.published) ? entry.published[0]?.split('T')[0] : (entry.published?.split('T')[0] || ''),
+                        url: entryId || '',
+                        doi: entry['arxiv:doi']?.[0] || ''
+                    };
+                });
+
+                resolve(results);
             });
         });
-
-        return results;
     }
 
     // Semantic Scholar API
@@ -138,11 +145,17 @@ class SearchService {
             });
 
             const response = await axios.get(`${url}?${params}`);
+            
+            if (!response.data.data || !Array.isArray(response.data.data)) {
+                console.log('Semantic Scholar response structure:', JSON.stringify(response.data, null, 2));
+                return [];
+            }
+
             return response.data.data.map(paper => ({
                 source: 'Semantic Scholar',
-                id: paper.paperId,
+                id: paper.paperId || '',
                 title: paper.title || 'No title',
-                authors: paper.authors?.map(a => a.name).join(', ') || '',
+                authors: Array.isArray(paper.authors) ? paper.authors.map(a => a.name).join(', ') : '',
                 abstract: paper.abstract || '',
                 journal: paper.venue || paper.journal?.name || '',
                 publicationDate: paper.year?.toString() || '',
@@ -151,6 +164,10 @@ class SearchService {
             }));
         } catch (error) {
             console.error('Semantic Scholar API error:', error.message);
+            if (error.response) {
+                console.log('Semantic Scholar response status:', error.response.status);
+                console.log('Semantic Scholar response data:', error.response.data);
+            }
             return [];
         }
     }
@@ -194,7 +211,7 @@ class SearchService {
             const params = new URLSearchParams({
                 query: query,
                 rows: 20,
-                select: 'title,author,abstract,journal,published-print,DOI,URL,container-title'
+                select: 'title,author,abstract,published-print,DOI,URL,container-title'
             });
 
             const response = await axios.get(`${url}?${params}`, {
@@ -213,10 +230,10 @@ class SearchService {
                 return {
                     source: 'CrossRef',
                     id: item.DOI || '',
-                    title: item.title?.[0] || 'No title',
+                    title: Array.isArray(item.title) ? item.title[0] : (item.title || 'No title'),
                     authors: authorList.map(a => `${a.given} ${a.family}`).join(', '),
                     abstract: item.abstract || '',
-                    journal: item['container-title']?.[0] || '',
+                    journal: Array.isArray(item['container-title']) ? item['container-title'][0] : (item['container-title'] || ''),
                     publicationDate: item['published-print']?.['date-parts']?.[0]?.[0]?.toString() || '',
                     url: item.URL || '',
                     doi: item.DOI || ''
@@ -224,6 +241,10 @@ class SearchService {
             });
         } catch (error) {
             console.error('CrossRef API error:', error.message);
+            if (error.response) {
+                console.log('CrossRef response status:', error.response.status);
+                console.log('CrossRef response data:', error.response.data);
+            }
             return [];
         }
     }
