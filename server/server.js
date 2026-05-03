@@ -12,8 +12,16 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this-in-pro
 
 // Middleware
 app.use(cors({
-    origin: ['https://george-moses-ada.github.io', 'https://dolph-search-ai.onrender.com', 'http://localhost:3000', 'http://localhost:8080'],
-    credentials: true
+    origin: [
+        'https://george-moses-ada.github.io', 
+        'https://dolph-search-ai.onrender.com', 
+        'http://localhost:3000', 
+        'http://localhost:8080',
+        /^https:\/\/.*\.vercel\.app$/
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 app.use(bodyParser.json());
 
