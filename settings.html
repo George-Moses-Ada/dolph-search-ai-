@@ -283,16 +283,21 @@
             };
 
             useEffect(() => {
-                // Load settings from localStorage
-                const savedSettings = localStorage.getItem('userSettings');
-                if (savedSettings) {
-                    setSettings(JSON.parse(savedSettings));
-                }
-
                 // Check if user is logged in
                 const userData = localStorage.getItem('user');
                 if (userData) {
                     setUser(JSON.parse(userData));
+                } else {
+                    // User is not logged in, redirect to login page
+                    alert('Please sign in to access settings');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Load settings from localStorage
+                const savedSettings = localStorage.getItem('userSettings');
+                if (savedSettings) {
+                    setSettings(JSON.parse(savedSettings));
                 }
 
                 // Apply theme on mount

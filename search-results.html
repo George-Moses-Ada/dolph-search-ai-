@@ -51,6 +51,11 @@
                 const userData = localStorage.getItem('user');
                 if (userData) {
                     setUser(JSON.parse(userData));
+                } else {
+                    // User is not logged in, redirect to login page
+                    alert('Please sign in to view search results');
+                    window.location.href = 'login.html';
+                    return;
                 }
 
                 // Get query from URL parameters
