@@ -11,13 +11,12 @@
   ],
   "routes": [
     {
-      "src": "/server/package.json",
-      "dest": "/api"
+      "src": "/api/(.*)",
+      "dest": "https://dolph-search-ai.onrender.com/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
     }
-  ],
-  "functions": {
-    "server/server.js": {
-      "maxDuration": 30
-    }
-  }
+  ]
 }
