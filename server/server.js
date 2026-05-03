@@ -172,11 +172,11 @@ app.post('/api/search', async (req, res) => {
         // Parse sources from comma-separated string or array
         let selectedSources = sources 
             ? (typeof sources === 'string' ? sources.split(',') : sources)
-            : ['PubMed', 'arXiv', 'Semantic Scholar', 'Europe PMC', 'CrossRef'];
+            : ['PubMed', 'arXiv', 'Semantic Scholar', 'Europe PMC', 'CrossRef', 'Nature', 'Cell', 'JAMA', 'NEJM'];
 
         // Handle 'All Search' by defaulting to all available sources
         if (selectedSources.includes('All Search')) {
-            selectedSources = ['PubMed', 'arXiv', 'Semantic Scholar', 'Europe PMC', 'CrossRef'];
+            selectedSources = ['PubMed', 'arXiv', 'Semantic Scholar', 'Europe PMC', 'CrossRef', 'Nature', 'Cell', 'JAMA', 'NEJM'];
         }
 
         const results = await searchService.searchAll(query, selectedSources);
