@@ -186,7 +186,7 @@
                     {/* Main content */}
                     <main className="flex-1 lg:overflow-hidden overflow-y-auto">
                         {/* Header */}
-                        <header className="h-[52px] bg-white border-b border-gray-200 flex items-center justify-between px-4 sticky top-0 z-30">
+                        <header className="lg:relative fixed top-0 left-0 right-0 h-[52px] bg-white border-b border-gray-200 flex items-center justify-between px-4 z-30">
                             <div className="flex items-center gap-2">
                                 <div className="lg:hidden flex items-center gap-2 cursor-pointer" onClick={() => window.location.href = 'index.html'}>
                                     <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJAAAACQCAYAAADnRuK4AAAACXBIWXMAACxLAAAsSwGlPZapAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAOdEVYdFNvZnR3YXJlAEZpZ21hnrGWYwAAHXtJREFUeAHtXQmQHNV5/rvnvvfe1e6iE3QsIIFkswsyBgNSsDkC4UgMdmE5tqm4AnLZlYrLNilVOY5dEMeRTRxBnMjBMo4BGQIEg0QiWxiQBBiQxOpCWh0rdle72mNmd3bO7ry/Z3p2jn59TffszOx8VV27M93TMz3z9f9///HeY2AWwfM8S/44yWYlmyP915rebYUassGRLZH1N0q2GG4Mw3AwS2CghEgTxk42N9k8UCOJUYiltylCpjCUECUhECEOWhkfpIjDQg2mYWAcuA/7IHx8AkIbPsVEwGSYRqC0tQmQzQ8aSDM0QbZBgHHyN2Lw5TsNP1DhNGrO4wBVwFM5nKlz4hYIzDyPwK9qIv3dDQ6l/p+cgoTXAmN3381MgkkwnEBaiHPkFMDRI+Tio8aTZS5AJKgzTUIkGAqjSN7Nl0hCoi0AE5/5DBMEg2EogQh50EU1goy22b2P3CVDNcLMBpBIRlskQwhEiIOEaQaK8T9FCLNvX4005QJrAsJHj8L5TZuYBBSJoglEyIPuqg4k3NUR4p727YcayhAWC3C2JJwv1hrpJlBa69RDSuvkAIXw7t01i1MJ4KcheN99zHnQCV0ESrusVkjldHLwwo5UBFVD5YAnOaS+XhjS49I0EyhNnnmQJ5RR56DVqaEygQL79BEY0EoiTQSikWfH7lRkVUNlQw+JVBOIRp6ay6ouaCWRKgLRyPP0CzWhXI3QQiK1JQYUzDXyzBFYLWBd1AWtmzbxivxQPIBYH8ws50RbNfJUP1xOsC9aKaRpZCHrwgh5vJDKMGfw9I5UraWGykDnPPA3NyY7XS6Lz26HThsLfqeT72KyfvmpaWbP4Eew94Pj0I+Ps4vAXiucl6uhUQmU1j0dkGWlatFWZaDnsmRPQ6PlBo+b72FZ6CJZZxAJw1B+8QRRO+EI88zxPvjx8VMpIiEwY33ADWc3fUpaD8kRCHWPW3yMxNlRy/OUNZA4bW2WB10uvgdJowfxOEBoktn8f6/DZvG5aBwin7+DGZA6XpJAUq7rF09DDWUKdFOXXwrf8Xr4O/USJxsch6mZXBIRrzZ0662F3Y40EZ0jnlD31FCeuOZKWHfVx/ndAb8x5EEQtwd1AX7j1d1wh/jcFAeNUlFZwRPp6nomZMfCaE00lx/Q6ty0jn+kYx7/GBHHfjAYAon8/EPzW4RWZLCwYF21qvB9pCxQzkE7atan7IBap2cN/2KdH+5gdXSY83xq4xTGciAxF18IX8w89kMg3wpZc08saJ/Mc/tPQQ1lhhuvg4fqA+wGte4qmQQ4fY6Dt47FYHwKoCnxVvDAxGr/kf6ksP+WbgfcebUDbBI9pBix+Tz8BqeDEbRQMgHsqmsEAzMuHpP/shzt8/4+qKFMcPES6LzoInjY4+F7GBUFqNEgD1t3RuCFvREYGEuZGnvsNNSNPuc/19aVOe6d43F4+1gcHv6SF91UAWw28F+6AroPHIK9wjk4od89Q6DMS9JDbzKEOlXL95QNPtEN6y6+mH/R61UmD7qll/bFYP13xuDxl8MZ8iC8wZdhynt14fkvc8Dxs9L+DF2kxw09+D827VutwO7axWdSjdkWyJv9wn0166MLaCnqm2CFg2R9SUa3w8LwAYuN6RD3MzzvJyTI6EwOGCFpxyUgOB3lDk1OsXtO98Oh/gEIolC+ZAVsbKjjN6jROueJ1XngpyHBquTDE94XdEYO+0ebvlKwb0m7FSZjnKCLpAjqcvBdYsYHs9S+BkFYC8WsbAJ5sl9Uq3UpA8nS3AbdPg+scDqI" className="w-8 h-8 object-contain" alt="Dolph Search Logo" />
@@ -228,12 +228,12 @@
                         </header>
 
                         {/* Hero section */}
-                        <div className="h-full flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
+                        <div className="h-full flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 lg:pt-0 pt-[52px]">
                             <div className="max-w-6xl mx-auto px-6 text-center" style={{ marginTop: '-120px' }}>
-                                <h1 className="text-5xl font-bold text-[#111827] mb-6">
+                                <h1 className="text-4xl lg:text-5xl font-bold text-[#111827] mb-6">
                                     Dolph Search
                                 </h1>
-                                <p className="text-xl text-[#6b7280] mb-8 max-w-3xl mx-auto">
+                                <p className="text-lg lg:text-xl text-[#6b7280] mb-8 max-w-3xl mx-auto">
                                     Get evidence-based answers from academic papers, citations etc. with AI-powered research assistance
                                 </p>
 
