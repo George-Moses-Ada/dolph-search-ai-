@@ -256,9 +256,9 @@
                                         </button>
                                         
                                         {dropdownOpen && (
-                                            <div className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg z-10">
+                                            <div className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
                                                 {searchOptions.map(option => (
-                                                    <label key={option} className="flex items-center px-3 py-2 hover:bg-gray-50 cursor-pointer">
+                                                    <label key={option} className="flex items-center px-3 py-2 hover:bg-gray-50 cursor-pointer whitespace-nowrap">
                                                         <input
                                                             type="checkbox"
                                                             checked={searchTypes.includes(option)}
