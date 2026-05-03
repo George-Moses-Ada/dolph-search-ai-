@@ -552,7 +552,7 @@
                     {/* Main content */}
                     <main className="flex-1 h-screen overflow-y-auto">
                         {/* Header */}
-                        <header className="lg:relative fixed top-0 left-0 right-0 h-[52px] bg-white border-b border-gray-200 flex items-center justify-between px-4 z-30">
+                        <header className="fixed top-0 left-0 right-0 h-[52px] bg-white border-b border-gray-200 flex items-center justify-between px-4 z-30">
                             <div className="flex items-center gap-2">
                                 <div className="lg:hidden flex items-center gap-2 cursor-pointer" onClick={() => window.location.href = 'index.html'}>
                                     <div className="w-8 h-8 bg-[#2563eb] rounded-full flex items-center justify-center">
@@ -601,8 +601,8 @@
                             </div>
                         </header>
 
-                        {/* Settings content */}
-                        <div className="max-w-4xl mx-auto p-6 lg:pt-20 pt-[72px]">
+                        {/* Settings content with proper spacing for fixed header */}
+                        <div className="max-w-4xl mx-auto p-6 pt-[72px]">
                             {/* Header */}
                             <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-6">
                                 <h1 className="text-2xl font-bold text-[#111827] mb-2">{t('settings')}</h1>
