@@ -76,6 +76,21 @@
             const performSearch = () => {
                 // Check if user is logged in
                 if (!user) {
+                    const searchInput = document.querySelector('input[type="text"]');
+                    const query = searchInput.value.trim();
+                    
+                    if (!query) {
+                        alert('Please enter a search query');
+                        return;
+                    }
+                    
+                    // Store search parameters for after login
+                    const types = searchTypes.join(',');
+                    sessionStorage.setItem('pendingSearch', JSON.stringify({
+                        query: query,
+                        types: types
+                    }));
+                    
                     alert('Please sign in to search for results');
                     window.location.href = 'login.html';
                     return;

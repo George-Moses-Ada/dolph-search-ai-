@@ -52,7 +52,18 @@
                 if (userData) {
                     setUser(JSON.parse(userData));
                 } else {
-                    // User is not logged in, redirect to login page
+                    // User is not logged in, store search parameters and redirect to login
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const searchQuery = urlParams.get('query');
+                    const searchTypesParam = urlParams.get('types') || 'All Search';
+                    
+                    if (searchQuery) {
+                        sessionStorage.setItem('pendingSearch', JSON.stringify({
+                            query: searchQuery,
+                            types: searchTypesParam
+                        }));
+                    }
+                    
                     alert('Please sign in to view search results');
                     window.location.href = 'login.html';
                     return;
