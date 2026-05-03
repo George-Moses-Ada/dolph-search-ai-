@@ -38,6 +38,7 @@
             const [results, setResults] = useState([]);
             const [loading, setLoading] = useState(true);
             const [user, setUser] = useState(null);
+            const [dropdownOpen, setDropdownOpen] = useState(null);
 
             const handleLogout = () => {
                 localStorage.removeItem('token');
@@ -479,25 +480,47 @@
                                                                 >
                                                                     View Paper
                                                                 </button>
-                                                                <div className="flex gap-2">
+                                                                <div className="relative">
                                                                     <button 
-                                                                        onClick={() => downloadPaper(result, 'txt')}
-                                                                        className="flex-1 bg-gray-100 text-gray-800 px-2 py-2 rounded text-sm hover:bg-gray-200 text-xs whitespace-nowrap"
+                                                                        onClick={() => setDropdownOpen(dropdownOpen === result.id ? null : result.id)}
+                                                                        className="w-full bg-gray-100 text-gray-800 px-3 py-2 rounded text-sm hover:bg-gray-200 flex items-center justify-between"
                                                                     >
-                                                                        Download TXT
+                                                                        <span>Download</span>
+                                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                                        </svg>
                                                                     </button>
-                                                                    <button 
-                                                                        onClick={() => downloadPaper(result, 'doc')}
-                                                                        className="flex-1 bg-gray-100 text-gray-800 px-2 py-2 rounded text-sm hover:bg-gray-200 text-xs whitespace-nowrap"
-                                                                    >
-                                                                        Download DOC
-                                                                    </button>
-                                                                    <button 
-                                                                        onClick={() => downloadPaper(result, 'pdf')}
-                                                                        className="flex-1 bg-gray-100 text-gray-800 px-2 py-2 rounded text-sm hover:bg-gray-200 text-xs whitespace-nowrap"
-                                                                    >
-                                                                        Download PDF
-                                                                    </button>
+                                                                    {dropdownOpen === result.id && (
+                                                                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                                                                            <button 
+                                                                                onClick={() => {
+                                                                                    downloadPaper(result, 'txt');
+                                                                                    setDropdownOpen(null);
+                                                                                }}
+                                                                                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 flex items-center gap-2"
+                                                                            >
+                                                                                <span className="text-gray-600">TXT</span>
+                                                                            </button>
+                                                                            <button 
+                                                                                onClick={() => {
+                                                                                    downloadPaper(result, 'doc');
+                                                                                    setDropdownOpen(null);
+                                                                                }}
+                                                                                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 flex items-center gap-2"
+                                                                            >
+                                                                                <span className="text-gray-600">DOC</span>
+                                                                            </button>
+                                                                            <button 
+                                                                                onClick={() => {
+                                                                                    downloadPaper(result, 'pdf');
+                                                                                    setDropdownOpen(null);
+                                                                                }}
+                                                                                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 flex items-center gap-2"
+                                                                            >
+                                                                                <span className="text-gray-600">PDF</span>
+                                                                            </button>
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                                 <button className="w-full bg-gray-100 text-gray-800 px-3 py-2 rounded text-sm hover:bg-gray-200">
                                                                     Save
