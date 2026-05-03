@@ -13,6 +13,77 @@
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
         }
+        
+        /* Dark mode styles */
+        .dark {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        
+        .dark .bg-white {
+            background-color: #2d2d2d !important;
+        }
+        
+        .dark .bg-gray-50 {
+            background-color: #1a1a1a !important;
+        }
+        
+        .dark .bg-gray-100 {
+            background-color: #2d2d2d !important;
+        }
+        
+        .dark .text-gray-600 {
+            color: #a0a0a0 !important;
+        }
+        
+        .dark .text-gray-700 {
+            color: #e0e0e0 !important;
+        }
+        
+        .dark .text-gray-800 {
+            color: #ffffff !important;
+        }
+        
+        .dark .text-gray-900 {
+            color: #ffffff !important;
+        }
+        
+        .dark .border-gray-100 {
+            border-color: #404040 !important;
+        }
+        
+        .dark .border-gray-200 {
+            border-color: #404040 !important;
+        }
+        
+        .dark .border-gray-300 {
+            border-color: #404040 !important;
+        }
+        
+        .dark .bg-\[f9f9f9\] {
+            background-color: #2d2d2d !important;
+        }
+        
+        .dark .bg-\[2563eb\] {
+            background-color: #3b82f6 !important;
+        }
+        
+        .dark .hover\:bg-gray-50:hover {
+            background-color: #2d2d2d !important;
+        }
+        
+        .dark .hover\:bg-gray-100:hover {
+            background-color: #404040 !important;
+        }
+        
+        .dark .hover\:bg-gray-200:hover {
+            background-color: #404040 !important;
+        }
+        
+        .dark .hover\:bg-blue-600:hover {
+            background-color: #2563eb !important;
+        }
+        
         .toggle-switch {
             position: relative;
             width: 48px;
@@ -107,6 +178,10 @@
                 if (userData) {
                     setUser(JSON.parse(userData));
                 }
+
+                // Apply theme on mount
+                const theme = localStorage.getItem('theme') || 'light';
+                document.documentElement.className = theme === 'dark' ? 'dark' : '';
             }, []);
 
             const handleSettingChange = (category, key, value) => {
@@ -119,6 +194,13 @@
                 }));
             };
 
+            const toggleTheme = () => {
+                const newTheme = settings.appearance.theme === 'light' ? 'dark' : 'light';
+                handleSettingChange('appearance', 'theme', newTheme);
+                document.documentElement.className = newTheme === 'dark' ? 'dark' : '';
+                localStorage.setItem('theme', newTheme);
+            };
+
             const saveSettings = async () => {
                 setSaving(true);
                 setSaveMessage('');
@@ -126,6 +208,7 @@
                 // Simulate API call
                 setTimeout(() => {
                     localStorage.setItem('userSettings', JSON.stringify(settings));
+                    localStorage.setItem('theme', settings.appearance.theme);
                     setSaving(false);
                     setSaveMessage('Settings saved successfully!');
                     
@@ -390,6 +473,63 @@
                                             />
                                             <span className="toggle-slider"></span>
                                         </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Appearance */}
+                            <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-6">
+                                <h2 className="text-lg font-semibold text-[#111827] mb-4">Appearance</h2>
+                                
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-700">Theme</label>
+                                            <p className="text-sm text-gray-500">Choose between light and dark mode</p>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm text-gray-600">☀️</span>
+                                            <label className="toggle-switch">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={settings.appearance.theme === 'dark'}
+                                                    onChange={toggleTheme}
+                                                />
+                                                <span className="toggle-slider"></span>
+                                            </label>
+                                            <span className="text-sm text-gray-600">🌙</span>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Font Size
+                                        </label>
+                                        <select
+                                            value={settings.appearance.fontSize}
+                                            onChange={(e) => handleSettingChange('appearance', 'fontSize', e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        >
+                                            <option value="small">Small</option>
+                                            <option value="medium">Medium</option>
+                                            <option value="large">Large</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Language
+                                        </label>
+                                        <select
+                                            value={settings.appearance.language}
+                                            onChange={(e) => handleSettingChange('appearance', 'language', e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        >
+                                            <option value="en">English</option>
+                                            <option value="es">Español</option>
+                                            <option value="fr">Français</option>
+                                            <option value="de">Deutsch</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
