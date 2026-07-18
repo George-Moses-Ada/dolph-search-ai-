@@ -85,6 +85,8 @@
                 articleTypes: []
             });
             const [filteredResults, setFilteredResults] = useState([]);
+            const [currentPage, setCurrentPage] = useState(1);
+            const [visibleResults, setVisibleResults] = useState([]);
             const timelineRef = useRef(null);
             const [displayOptionsOpen, setDisplayOptionsOpen] = useState(false);
             const [additionalFiltersOpen, setAdditionalFiltersOpen] = useState(false);
@@ -146,9 +148,12 @@
 
             useEffect(() => {
                 if (results.length > 0) {
-                    setFilteredResults(applyFilters(results));
+                    const filtered = applyFilters(results);
+                    setFilteredResults(filtered);
+                    setCurrentPage(1);
+                    setVisibleResults(filtered.slice(0, displayOptions.resultsPerPage));
                 }
-            }, [results, selectedFilters]);
+            }, [results, selectedFilters, displayOptions.resultsPerPage]);
 
             useEffect(() => {
                 // Load display options from localStorage
@@ -835,7 +840,7 @@
                                 {/* Results Header */}
                                 <div className="mb-4">
                                     <h1 className="text-2xl font-bold text-gray-900">{filteredResults.length.toLocaleString()} Results</h1>
-                                    <p className="text-sm text-gray-600">Page 1 of {Math.ceil(filteredResults.length / displayOptions.resultsPerPage).toLocaleString()}</p>
+                                    <p className="text-sm text-gray-600">Showing {visibleResults.length} of {filteredResults.length.toLocaleString()} results</p>
                                     <div className="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
                                         <p className="text-sm text-gray-700">
                                             <span className="font-medium">Query:</span> "{query}"
@@ -860,7 +865,7 @@
                                     <>
                                         {/* Results list */}
                                         <div className="space-y-4 mb-6">
-                                            {filteredResults.map(result => (
+                                            {visibleResults.map(result => (
                                                 <div key={result.id} className={`result-item bg-white rounded-lg shadow-sm border border-gray-200 ${getDensityClass()}`}>
                                                     <div className="flex flex-col lg:flex-row lg:items-start gap-4">
                                                         <div className="flex items-start gap-4 w-full">
@@ -917,6 +922,21 @@
                                                 </div>
                                             ))}
                                         </div>
+
+                                        {/* Load More Button */}
+                                        {visibleResults.length < filteredResults.length && (
+                                            <div className="text-center mb-6">
+                                                <button
+                                                    onClick={() => {
+                                                        const nextResults = filteredResults.slice(0, visibleResults.length + displayOptions.resultsPerPage);
+                                                        setVisibleResults(nextResults);
+                                                    }}
+                                                    className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+                                                >
+                                                    Load More Results
+                                                </button>
+                                            </div>
+                                        )}
 
                                         {/* Summary */}
                                         {(() => {
