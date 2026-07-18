@@ -8,6 +8,7 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone@7.22.0/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="config.js"></script>
     <style>
         body {
@@ -17,11 +18,7 @@
             transition: all 0.3s ease;
         }
         .result-item:hover {
-            transform: translateX(4px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .confidence-bar {
-            transition: width 0.5s ease;
         }
     </style>
 </head>
@@ -29,16 +26,65 @@
     <div id="root"></div>
 
     <script type="text/babel" data-prescript="true">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useRef } = React;
+
+        // Timeline dataset
+        const timelineData = {
+            1781: 2, 1783: 1, 1792: 1, 1793: 2, 1799: 1, 1801: 2, 1805: 1, 1806: 1, 1807: 3, 1808: 4,
+            1809: 2, 1810: 2, 1811: 6, 1812: 1, 1813: 3, 1814: 2, 1815: 8, 1816: 5, 1817: 6, 1818: 6,
+            1819: 5, 1820: 6, 1822: 1, 1823: 5, 1824: 7, 1825: 8, 1826: 7, 1827: 11, 1828: 13, 1829: 11,
+            1830: 11, 1831: 10, 1832: 9, 1833: 3, 1834: 6, 1835: 5, 1836: 4, 1837: 4, 1838: 2, 1839: 14,
+            1840: 9, 1841: 20, 1842: 37, 1843: 26, 1844: 23, 1845: 42, 1846: 40, 1847: 17, 1848: 25,
+            1849: 13, 1850: 15, 1851: 13, 1852: 29, 1853: 39, 1854: 18, 1855: 19, 1856: 11, 1857: 11,
+            1858: 15, 1859: 17, 1860: 8, 1861: 9, 1862: 5, 1863: 9, 1864: 14, 1865: 6, 1866: 19,
+            1867: 20, 1868: 34, 1869: 28, 1870: 28, 1871: 24, 1872: 30, 1873: 47, 1874: 39, 1875: 36,
+            1876: 23, 1877: 28, 1878: 42, 1879: 20, 1880: 33, 1881: 22, 1882: 40, 1883: 27, 1884: 25,
+            1885: 25, 1886: 24, 1887: 25, 1888: 34, 1889: 18, 1890: 23, 1891: 25, 1892: 29, 1893: 34,
+            1894: 31, 1895: 30, 1896: 49, 1897: 41, 1898: 38, 1899: 42, 1900: 43, 1901: 43, 1902: 48,
+            1903: 58, 1904: 45, 1905: 59, 1906: 55, 1907: 79, 1908: 62, 1909: 84, 1910: 67, 1911: 73,
+            1912: 102, 1913: 99, 1914: 72, 1915: 89, 1916: 75, 1917: 107, 1918: 111, 1919: 89, 1920: 91,
+            1921: 125, 1922: 127, 1923: 118, 1924: 130, 1925: 154, 1926: 149, 1927: 163, 1928: 178,
+            1929: 134, 1930: 164, 1931: 168, 1932: 181, 1933: 157, 1934: 161, 1935: 146, 1936: 161,
+            1937: 155, 1938: 163, 1939: 175, 1940: 145, 1941: 168, 1942: 153, 1943: 137, 1944: 126,
+            1945: 1250, 1946: 3308, 1947: 3986, 1948: 4435, 1949: 4158, 1950: 6249, 1951: 7200,
+            1952: 8193, 1953: 8610, 1954: 9175, 1955: 9688, 1956: 9459, 1957: 10544, 1958: 10714,
+            1959: 10156, 1960: 10091, 1961: 11561, 1962: 11688, 1963: 16146, 1964: 23164, 1965: 19695,
+            1966: 22548, 1967: 27804, 1968: 33042, 1969: 36630, 1970: 37055, 1971: 40771, 1972: 42924,
+            1973: 45321, 1974: 47392, 1975: 47062, 1976: 45427, 1977: 47727, 1978: 48686, 1979: 52283,
+            1980: 53648, 1981: 54281, 1982: 57243, 1983: 60233, 1984: 64003, 1985: 66350, 1986: 66927,
+            1987: 68791, 1988: 70876, 1989: 77596, 1990: 79373, 1991: 80301, 1992: 80487, 1993: 82279,
+            1994: 82917, 1995: 83730, 1996: 83885, 1997: 85538, 1998: 87365, 1999: 88730, 2000: 91755,
+            2001: 92667, 2002: 96232, 2003: 100984, 2004: 106494, 2005: 115462, 2006: 120869, 2007: 127583,
+            2008: 133855, 2009: 139095, 2010: 147076, 2011: 157575, 2012: 166327, 2013: 174367, 2014: 183340,
+            2015: 188832, 2016: 188106, 2017: 188611, 2018: 191399, 2019: 196375, 2020: 213803, 2021: 216837,
+            2022: 190858, 2023: 178530, 2024: 211574, 2025: 237697, 2026: 137159, 2027: 9
+        };
 
         function SearchResults() {
-            const [sidebarOpen, setSidebarOpen] = useState(false);
             const [query, setQuery] = useState('');
             const [searchTypes, setSearchTypes] = useState([]);
             const [results, setResults] = useState([]);
             const [loading, setLoading] = useState(true);
             const [user, setUser] = useState(null);
-            const [dropdownOpen, setDropdownOpen] = useState(null);
+            const [sidebarOpen, setSidebarOpen] = useState(false);
+            const [sortOption, setSortOption] = useState('Best Match');
+            const [displayOptions, setDisplayOptions] = useState({
+                density: 'comfortable',
+                showAuthors: true,
+                showAbstract: true,
+                showJournal: true,
+                showDOI: true,
+                showKeywords: true,
+                showCitations: true,
+                resultsPerPage: 20
+            });
+            const [selectedFilters, setSelectedFilters] = useState({
+                publicationDate: null,
+                textAvailability: [],
+                articleAttribute: false,
+                articleTypes: []
+            });
+            const timelineRef = useRef(null);
 
             const handleLogout = () => {
                 localStorage.removeItem('token');
@@ -52,7 +98,6 @@
                 if (userData) {
                     setUser(JSON.parse(userData));
                 } else {
-                    // User is not logged in, store search parameters and redirect to login
                     const urlParams = new URLSearchParams(window.location.search);
                     const searchQuery = urlParams.get('query');
                     const searchTypesParam = urlParams.get('types') || 'All Search';
@@ -84,6 +129,59 @@
                 }
             }, []);
 
+            useEffect(() => {
+                // Initialize timeline chart
+                if (timelineRef.current) {
+                    const ctx = timelineRef.current.getContext('2d');
+                    const years = Object.keys(timelineData).sort();
+                    const counts = years.map(year => timelineData[year]);
+                    
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: years,
+                            datasets: [{
+                                label: 'Publications',
+                                data: counts,
+                                backgroundColor: 'rgba(37, 99, 235, 0.6)',
+                                borderColor: 'rgba(37, 99, 235, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        title: (items) => `Year: ${items[0].label}`,
+                                        label: (item) => `Publications: ${item.raw}`
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    display: false
+                                },
+                                y: {
+                                    display: false
+                                }
+                            },
+                            onClick: (event, elements) => {
+                                if (elements.length > 0) {
+                                    const index = elements[0].index;
+                                    const year = years[index];
+                                    console.log('Selected year:', year);
+                                }
+                            }
+                        }
+                    });
+                }
+            }, []);
+
             const performSearch = async (searchQuery, types) => {
                 setLoading(true);
                 
@@ -105,7 +203,6 @@
                         throw new Error(data.error || 'Search failed');
                     }
 
-                    // Transform API results to match the existing result structure
                     const transformedResults = data.results.map((result, index) => ({
                         id: index + 1,
                         title: result.title || 'No title',
@@ -113,19 +210,19 @@
                         journal: result.journal || '',
                         year: result.publicationDate || '',
                         abstract: result.abstract || '',
-                        confidence: 85, // Default confidence score
-                        citations: result.citationCount || 0, // Use actual citation count if available
+                        confidence: 85,
+                        citations: result.citationCount || 0,
                         doi: result.doi || '',
                         relevance: 'High',
                         source: result.source,
                         url: result.url || '',
-                        citationList: [] // Placeholder - would need additional API calls
+                        articleType: 'Article',
+                        keywords: ['research', 'study', 'analysis']
                     }));
 
                     setResults(transformedResults);
                 } catch (error) {
                     console.error('Search error:', error);
-                    // Fallback to mock data if API fails
                     const sampleResults = [
                         {
                             id: 1,
@@ -140,7 +237,8 @@
                             relevance: "High",
                             source: "Mock Data",
                             url: "",
-                            citationList: []
+                            articleType: "Review",
+                            keywords: ["intermittent fasting", "metabolic health", "insulin sensitivity"]
                         },
                         {
                             id: 2,
@@ -155,27 +253,13 @@
                             relevance: "High",
                             source: "Mock Data",
                             url: "",
-                            citationList: []
+                            articleType: "Clinical Trial",
+                            keywords: ["time-restricted eating", "glucose tolerance", "prediabetes"]
                         }
                     ];
                     setResults(sampleResults);
                 } finally {
                     setLoading(false);
-                }
-            };
-
-            const getConfidenceColor = (confidence) => {
-                if (confidence >= 90) return 'bg-green-500';
-                if (confidence >= 70) return 'bg-yellow-500';
-                return 'bg-red-500';
-            };
-
-            const getRelevanceColor = (relevance) => {
-                switch(relevance) {
-                    case 'High': return 'bg-green-100 text-green-800';
-                    case 'Medium': return 'bg-yellow-100 text-yellow-800';
-                    case 'Low': return 'bg-gray-100 text-gray-800';
-                    default: return 'bg-gray-100 text-gray-800';
                 }
             };
 
@@ -189,12 +273,10 @@
                     };
                 }
 
-                // Extract key themes from results
                 const titles = results.map(r => r.title.toLowerCase()).join(' ');
                 const abstracts = results.map(r => r.abstract.toLowerCase()).join(' ');
                 const allText = titles + ' ' + abstracts;
 
-                // Simple keyword extraction (in production, use NLP)
                 const words = allText.match(/\b\w{4,}\b/g) || [];
                 const wordFreq = {};
                 words.forEach(word => {
@@ -269,186 +351,226 @@
                 }
             };
 
+            const getDensityClass = () => {
+                switch (displayOptions.density) {
+                    case 'compact': return 'p-4';
+                    case 'comfortable': return 'p-6';
+                    case 'spacious': return 'p-8';
+                    default: return 'p-6';
+                }
+            };
+
             return (
-                <div className="flex h-screen bg-white">
-                    {/* Sidebar */}
-                    <aside className={`
-                        fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[#f9f9f9] border-r border-[rgba(13,13,13,0.05)]
-                        transform transition-transform duration-300 ease-in-out
-                        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-                    `}>
-                        <div className="flex flex-col h-full">
-                            {/* Logo */}
-                            <div className="flex items-center justify-between p-4 h-[52px]">
-                                <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.location.href = 'index.html'}>
-                                    <img src="data:image/png;base64,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" className="w-9 h-9 rounded-lg" alt="Logo" />
-                                    <span className="font-semibold text-base">Dolph Search</span>
+                <div className="flex h-screen bg-gray-50">
+                    {/* Header */}
+                    <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 z-50">
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.location.href = 'index.html'}>
+                                <div className="w-8 h-8 bg-[#2563eb] rounded-full flex items-center justify-center">
+                                    <span className="text-white text-sm font-bold">D</span>
                                 </div>
-                                <button
-                                    onClick={() => setSidebarOpen(false)}
-                                    className="lg:hidden p-2 hover:bg-gray-200 rounded-lg"
-                                >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
-
-                            {/* Navigation */}
-                            <nav className="flex-1 px-2 py-2">
-                            </nav>
-
-                            {/* Bottom section */}
-                            <div className="border-t border-[rgba(13,13,13,0.05)] p-2">
-                                <a href="plans.html" className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-200 rounded-lg text-left">
-                                    <svg className="w-5 h-5 text-[#0d0d0d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                    </svg>
-                                    <span className="text-sm text-[#0d0d0d]">See plans and pricing</span>
-                                </a>
-
-                                <a href="settings.html" className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-200 rounded-lg text-left">
-                                    <svg className="w-5 h-5 text-[#0d0d0d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                    <span className="text-sm text-[#0d0d0d]">Settings</span>
-                                </a>
-
-                                <a href="help.html" className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-200 rounded-lg text-left">
-                                    <svg className="w-5 h-5 text-[#0d0d0d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <span className="text-sm text-[#0d0d0d]">Help</span>
-                                </a>
-
-                                {user ? (
-                                    <div className="mt-4 p-4 bg-white rounded-lg">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 bg-[#2563eb] rounded-full flex items-center justify-center">
-                                                <span className="text-white text-sm font-medium">{user.name.charAt(0).toUpperCase()}</span>
-                                            </div>
-                                            <div className="flex-1">
-                                                <p className="text-sm font-normal text-[#111827]">{user.name}</p>
-                                                <p className="text-xs text-[#6b7280]">{user.email}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="mt-4 p-4 bg-white rounded-lg">
-                                        <p className="text-sm font-normal text-[#0d0d0d] mb-2">Get responses tailored to you</p>
-                                        <p className="text-sm text-[#8f8f8f] mb-4">Log in to get answers based on your inputs, plus upload files.</p>
-                                        <a href="login.html" className="w-full bg-[#2563eb] text-white py-2 px-4 rounded-full text-sm hover:bg-blue-600 inline-block text-center">
-                                            Log in
-                                        </a>
-                                    </div>
-                                )}
+                                <span className="font-semibold text-base text-gray-900">Dolph Search</span>
                             </div>
                         </div>
-                    </aside>
+                        
+                        {/* Search Bar */}
+                        <div className="flex-1 max-w-2xl mx-8">
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    value={query}
+                                    onChange={(e) => setQuery(e.target.value)}
+                                    placeholder="Search for research papers..."
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                                <button
+                                    onClick={() => performSearch(query, searchTypes)}
+                                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                                >
+                                    Search
+                                </button>
+                            </div>
+                        </div>
 
-                    {/* Mobile sidebar overlay */}
-                    {sidebarOpen && (
-                        <div
-                            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-                            onClick={() => setSidebarOpen(false)}
-                        />
-                    )}
-
-                    {/* Main content */}
-                    <main className="flex-1 h-screen overflow-y-auto">
-                        {/* Header */}
-                        <header className="lg:relative fixed top-0 left-0 right-0 h-[52px] bg-white border-b border-gray-200 flex items-center justify-between px-4 z-30">
-                            <div className="flex items-center gap-2">
-                                <div className="lg:hidden flex items-center gap-2 cursor-pointer" onClick={() => window.location.href = 'index.html'}>
+                        <div className="flex items-center gap-4">
+                            {user ? (
+                                <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 bg-[#2563eb] rounded-full flex items-center justify-center">
-                                        <span className="text-white text-sm font-bold">D</span>
+                                        <span className="text-white text-sm font-medium">{user.name.charAt(0).toUpperCase()}</span>
                                     </div>
-                                    <span className="font-semibold text-base text-gray-900">Dolph Search</span>
+                                    <span className="text-sm text-[#111827]">{user.name}</span>
+                                    <button onClick={handleLogout} className="text-sm text-[#6b7280] hover:text-[#111827]">
+                                        Log out
+                                    </button>
                                 </div>
-                                <a href="index.html" className="hidden lg:flex items-center gap-2 text-gray-600 hover:text-gray-900 px-2 py-1 rounded hover:bg-gray-100">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                    </svg>
-                                    <span className="text-sm">Back</span>
-                                </a>
-                            </div>
-                            <div className="flex-1" />
+                            ) : (
+                                <>
+                                    <a href="login.html" className="bg-[#2563eb] text-white px-4 py-2 rounded-full text-sm hover:bg-blue-600">
+                                        Log in
+                                    </a>
+                                    <a href="signup.html" className="bg-white border border-gray-300 px-4 py-2 rounded-full text-sm hover:bg-gray-50">
+                                        Sign up
+                                    </a>
+                                </>
+                            )}
+                        </div>
+                    </header>
 
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => setSidebarOpen(true)}
-                                    className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
-                                >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                                    </svg>
-                                </button>
-                                {user ? (
-                                    <div className="hidden lg:flex items-center gap-3">
-                                        <div className="w-8 h-8 bg-[#2563eb] rounded-full flex items-center justify-center">
-                                            <span className="text-white text-sm font-medium">{user.name.charAt(0).toUpperCase()}</span>
-                                        </div>
-                                        <span className="text-sm text-[#111827]">{user.name}</span>
-                                        <button onClick={handleLogout} className="text-sm text-[#6b7280] hover:text-[#111827]">
-                                            Log out
-                                        </button>
+                    {/* Main Content Area */}
+                    <div className="flex pt-16 h-screen">
+                        {/* Left Sidebar - Fixed 320px */}
+                        <aside className="w-80 bg-white border-r border-gray-200 h-full overflow-y-auto flex-shrink-0 hidden lg:block">
+                            <div className="p-4">
+                                {/* My Custom Filters */}
+                                <div className="mb-6">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <h3 className="font-semibold text-gray-900">MY CUSTOM FILTERS</h3>
+                                        <button className="text-sm text-blue-600 hover:text-blue-700">Edit custom filters</button>
                                     </div>
-                                ) : (
-                                    <>
-                                        <a href="login.html" className="hidden lg:flex bg-[#2563eb] text-white px-4 py-2 rounded-full text-sm hover:bg-blue-600">
-                                            Log in
-                                        </a>
-                                        <a href="signup.html" className="hidden lg:flex bg-white border border-gray-300 px-4 py-2 rounded-full text-sm hover:bg-gray-50">
-                                            Sign up for free
-                                        </a>
-                                    </>
-                                )}
-                            </div>
-                        </header>
+                                    <div className="text-sm text-gray-500 italic">No custom filters saved</div>
+                                </div>
 
-                        <div className="flex-1 flex flex-col overflow-hidden lg:pt-0 pt-[52px]">
-                            {/* Mobile back button */}
-                            <div className="lg:hidden p-4">
-                                <button
-                                    onClick={() => window.location.href = 'index.html'}
-                                    className="flex items-center gap-2 text-gray-600 hover:text-gray-900 px-2 py-1 rounded hover:bg-gray-100"
-                                >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                    </svg>
-                                    <span className="text-sm">Back</span>
-                                </button>
-                            </div>
-                            
-                            {/* Search results content */}
-                            <div className="flex-1 overflow-y-auto bg-gray-50">
-                                <div className="max-w-6xl mx-auto p-6">
-                                    {/* Search header */}
-                                    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-6">
-                                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                                            <div>
-                                                <h1 className="text-2xl font-bold text-[#111827] mb-2">Search Results</h1>
-                                                <p className="text-gray-600">
-                                                    Query: <span className="font-medium">"{query}"</span>
-                                                </p>
-                                                <div className="flex items-center gap-4 mt-2">
-                                                    <span className="text-sm text-gray-500">Types: {searchTypes.join(', ')}</span>
-                                                    <span className="text-sm text-gray-500">Found {results.length} results</span>
-                                                </div>
-                                            <h1 className="text-2xl font-bold text-[#111827] mb-2">Search Results</h1>
-                                            <p className="text-gray-600">
-                                                Query: <span className="font-medium">"{query}"</span>
-                                            </p>
-                                            <div className="flex items-center gap-4 mt-2">
-                                                <span className="text-sm text-gray-500">Types: {searchTypes.join(', ')}</span>
-                                                <span className="text-sm text-gray-500">Found {results.length} results</span>
-                                            </div>
-                                        </div>
-                                        <a href="index.html" className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200">
-                                            New Search
-                                        </a>
+                                {/* Results by Year */}
+                                <div className="mb-6">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <h3 className="font-semibold text-gray-900">RESULTS BY YEAR</h3>
+                                        <button className="text-sm text-blue-600 hover:text-blue-700">Expand</button>
                                     </div>
+                                    <div className="h-40 bg-gray-50 rounded border border-gray-200">
+                                        <canvas ref={timelineRef} id="timelineChart"></canvas>
+                                    </div>
+                                </div>
+
+                                {/* Publication Date */}
+                                <div className="mb-6">
+                                    <h3 className="font-semibold text-gray-900 mb-3">PUBLICATION DATE</h3>
+                                    <div className="space-y-2">
+                                        <label className="flex items-center">
+                                            <input type="radio" name="pubDate" className="mr-2" />
+                                            <span className="text-sm">1 Year</span>
+                                        </label>
+                                        <label className="flex items-center">
+                                            <input type="radio" name="pubDate" className="mr-2" />
+                                            <span className="text-sm">5 Years</span>
+                                        </label>
+                                        <label className="flex items-center">
+                                            <input type="radio" name="pubDate" className="mr-2" />
+                                            <span className="text-sm">10 Years</span>
+                                        </label>
+                                        <label className="flex items-center">
+                                            <input type="radio" name="pubDate" className="mr-2" />
+                                            <span className="text-sm">Custom Range</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {/* Text Availability */}
+                                <div className="mb-6">
+                                    <h3 className="font-semibold text-gray-900 mb-3">TEXT AVAILABILITY</h3>
+                                    <div className="space-y-2">
+                                        <label className="flex items-center">
+                                            <input type="checkbox" className="mr-2" />
+                                            <span className="text-sm">Abstract</span>
+                                        </label>
+                                        <label className="flex items-center">
+                                            <input type="checkbox" className="mr-2" />
+                                            <span className="text-sm">Free Full Text</span>
+                                        </label>
+                                        <label className="flex items-center">
+                                            <input type="checkbox" className="mr-2" />
+                                            <span className="text-sm">Full Text</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {/* Article Attribute */}
+                                <div className="mb-6">
+                                    <h3 className="font-semibold text-gray-900 mb-3">ARTICLE ATTRIBUTE</h3>
+                                    <label className="flex items-center">
+                                        <input type="checkbox" className="mr-2" />
+                                        <span className="text-sm">Associated Data</span>
+                                    </label>
+                                </div>
+
+                                {/* Article Type */}
+                                <div className="mb-6">
+                                    <h3 className="font-semibold text-gray-900 mb-3">ARTICLE TYPE</h3>
+                                    <div className="space-y-2">
+                                        <label className="flex items-center">
+                                            <input type="checkbox" className="mr-2" />
+                                            <span className="text-sm">Books and Documents</span>
+                                        </label>
+                                        <label className="flex items-center">
+                                            <input type="checkbox" className="mr-2" />
+                                            <span className="text-sm">Clinical Trial</span>
+                                        </label>
+                                        <label className="flex items-center">
+                                            <input type="checkbox" className="mr-2" />
+                                            <span className="text-sm">Meta Analysis</span>
+                                        </label>
+                                        <label className="flex items-center">
+                                            <input type="checkbox" className="mr-2" />
+                                            <span className="text-sm">Randomized Controlled Trial</span>
+                                        </label>
+                                        <label className="flex items-center">
+                                            <input type="checkbox" className="mr-2" />
+                                            <span className="text-sm">Review</span>
+                                        </label>
+                                        <label className="flex items-center">
+                                            <input type="checkbox" className="mr-2" />
+                                            <span className="text-sm">Systematic Review</span>
+                                        </label>
+                                    </div>
+                                    <button className="text-sm text-blue-600 hover:text-blue-700 mt-2">See all article type filters</button>
+                                </div>
+
+                                {/* Additional Filters */}
+                                <div className="mb-6">
+                                    <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+                                        Additional Filters +
+                                    </button>
+                                </div>
+
+                                {/* Filter Actions */}
+                                <div className="border-t border-gray-200 pt-4 space-y-2">
+                                    <button className="w-full text-sm text-gray-600 hover:text-gray-900 py-2 border border-gray-300 rounded hover:bg-gray-50">
+                                        Clear Applied Filters
+                                    </button>
+                                    <button className="w-full text-sm text-gray-600 hover:text-gray-900 py-2 border border-gray-300 rounded hover:bg-gray-50">
+                                        Reset Filters Menu
+                                    </button>
+                                </div>
+                            </div>
+                        </aside>
+
+                        {/* Main Search Results */}
+                        <main className="flex-1 overflow-y-auto">
+                            <div className="max-w-5xl mx-auto p-6">
+                                {/* Search Toolbar */}
+                                <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4 flex items-center gap-4">
+                                    <button className="text-sm text-gray-600 hover:text-gray-900">Save</button>
+                                    <button className="text-sm text-gray-600 hover:text-gray-900">Email</button>
+                                    <button className="text-sm text-gray-600 hover:text-gray-900">Export</button>
+                                    <button className="text-sm text-gray-600 hover:text-gray-900">Share</button>
+                                    <div className="flex-1"></div>
+                                    <select 
+                                        value={sortOption}
+                                        onChange={(e) => setSortOption(e.target.value)}
+                                        className="text-sm border border-gray-300 rounded px-3 py-1"
+                                    >
+                                        <option>Best Match</option>
+                                        <option>Newest</option>
+                                        <option>Oldest</option>
+                                        <option>Most Cited</option>
+                                        <option>Alphabetical</option>
+                                    </select>
+                                    <button className="text-sm text-gray-600 hover:text-gray-900">Display Options ⚙</button>
+                                </div>
+
+                                {/* Results Header */}
+                                <div className="mb-4">
+                                    <h1 className="text-2xl font-bold text-gray-900">{results.length.toLocaleString()} Results</h1>
+                                    <p className="text-sm text-gray-600">Page 1 of {Math.ceil(results.length / displayOptions.resultsPerPage).toLocaleString()}</p>
                                 </div>
 
                                 {/* Loading state */}
@@ -456,7 +578,7 @@
                                     <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-12 text-center">
                                         <div className="inline-flex items-center gap-2">
                                             <svg className="w-6 h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.001 0 01-15.357-2m15.357 2H15" />
                                             </svg>
                                             <span>Searching through academic databases...</span>
                                         </div>
@@ -466,111 +588,50 @@
                                         {/* Results list */}
                                         <div className="space-y-4 mb-6">
                                             {results.map(result => (
-                                                <div key={result.id} className="result-item bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-                                                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                                                <div key={result.id} className={`result-item bg-white rounded-lg shadow-sm border border-gray-200 ${getDensityClass()}`}>
+                                                    <div className="flex items-start gap-4">
+                                                        <input type="checkbox" className="mt-1" />
                                                         <div className="flex-1">
                                                             <h3 className="text-lg font-semibold text-[#111827] mb-2 hover:text-blue-600 cursor-pointer">
                                                                 {result.title}
                                                             </h3>
-                                                            <p className="text-sm text-gray-600 mb-2">
-                                                                {result.authors} • {result.journal} • {result.year}
-                                                            </p>
-                                                            <p className="text-gray-700 mb-4 line-clamp-3">
-                                                                {result.abstract}
-                                                            </p>
-                                                            
-                                                            {/* Citations Section */}
-                                                            <div className="mb-4">
-                                                                <h4 className="text-sm font-semibold text-gray-900 mb-2">Key Citations</h4>
-                                                                <div className="space-y-2">
-                                                                    {result.citationList && result.citationList.map(citation => (
-                                                                        <div key={citation.id} className="bg-gray-50 p-3 rounded text-sm text-gray-700 border-l-4 border-blue-500">
-                                                                            <span className="font-medium">[{citation.id}]</span> {citation.text}
-                                                                        </div>
+                                                            {displayOptions.showAuthors && (
+                                                                <p className="text-sm text-gray-600 mb-2">
+                                                                    {result.authors}
+                                                                </p>
+                                                            )}
+                                                            {(displayOptions.showJournal || displayOptions.showDOI) && (
+                                                                <p className="text-sm text-gray-600 mb-2">
+                                                                    {displayOptions.showJournal && `${result.journal} • `}
+                                                                    {displayOptions.showJournal && result.year}
+                                                                    {displayOptions.showDOI && ` • DOI: ${result.doi}`}
+                                                                </p>
+                                                            )}
+                                                            {displayOptions.showAbstract && (
+                                                                <p className="text-gray-700 mb-4 line-clamp-3">
+                                                                    {result.abstract}
+                                                                </p>
+                                                            )}
+                                                            {displayOptions.showKeywords && (
+                                                                <div className="flex flex-wrap gap-2 mb-4">
+                                                                    {result.keywords.map((keyword, idx) => (
+                                                                        <span key={idx} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
+                                                                            {keyword}
+                                                                        </span>
                                                                     ))}
                                                                 </div>
-                                                            </div>
-                                                            
+                                                            )}
                                                             <div className="flex flex-wrap items-center gap-4 text-sm">
-                                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRelevanceColor(result.relevance)}`}>
-                                                                    {result.relevance} Relevance
-                                                                </span>
-                                                                <span className="text-gray-500">
-                                                                    {result.citations} citations
-                                                                </span>
-                                                                <span className="text-gray-500">
-                                                                    DOI: {result.doi}
-                                                                </span>
+                                                                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">{result.articleType}</span>
+                                                                {displayOptions.showCitations && (
+                                                                    <span className="text-gray-500">{result.citations} citations</span>
+                                                                )}
                                                             </div>
                                                         </div>
-                                                        
-                                                        <div className="lg:w-48">
-                                                            <div className="text-center mb-2">
-                                                                <div className="text-sm text-gray-600 mb-1">Confidence</div>
-                                                                <div className="text-2xl font-bold text-gray-900">{result.confidence}%</div>
-                                                                <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                                                                    <div className={`confidence-bar ${getConfidenceColor(result.confidence)} h-2 rounded-full`} style={{width: `${result.confidence}%`}}></div>
-                                                                </div>
-                                                            </div>
-                                                            <div className="space-y-2">
-                                                                <button 
-                                                                    onClick={() => {
-                                                                        if (result.url) {
-                                                                            window.open(result.url, '_blank');
-                                                                        } else {
-                                                                            alert('Paper URL not available. Try downloading the paper instead.');
-                                                                        }
-                                                                    }}
-                                                                    className="w-full bg-[#2563eb] text-white px-3 py-2 rounded text-sm hover:bg-blue-600"
-                                                                >
-                                                                    View Paper
-                                                                </button>
-                                                                <div className="relative">
-                                                                    <button 
-                                                                        onClick={() => setDropdownOpen(dropdownOpen === result.id ? null : result.id)}
-                                                                        className="w-full bg-gray-100 text-gray-800 px-3 py-2 rounded text-sm hover:bg-gray-200 flex items-center justify-between"
-                                                                    >
-                                                                        <span>Download</span>
-                                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                                                        </svg>
-                                                                    </button>
-                                                                    {dropdownOpen === result.id && (
-                                                                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                                                                            <button 
-                                                                                onClick={() => {
-                                                                                    downloadPaper(result, 'txt');
-                                                                                    setDropdownOpen(null);
-                                                                                }}
-                                                                                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 flex items-center gap-2"
-                                                                            >
-                                                                                <span className="text-gray-600">TXT</span>
-                                                                            </button>
-                                                                            <button 
-                                                                                onClick={() => {
-                                                                                    downloadPaper(result, 'doc');
-                                                                                    setDropdownOpen(null);
-                                                                                }}
-                                                                                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 flex items-center gap-2"
-                                                                            >
-                                                                                <span className="text-gray-600">DOC</span>
-                                                                            </button>
-                                                                            <button 
-                                                                                onClick={() => {
-                                                                                    downloadPaper(result, 'pdf');
-                                                                                    setDropdownOpen(null);
-                                                                                }}
-                                                                                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 flex items-center gap-2"
-                                                                            >
-                                                                                <span className="text-gray-600">PDF</span>
-                                                                            </button>
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                                <button className="w-full bg-gray-100 text-gray-800 px-3 py-2 rounded text-sm hover:bg-gray-200">
-                                                                    Save
-                                                                </button>
-                                                            </div>
+                                                        <div className="flex flex-col gap-2">
+                                                            <button className="text-sm text-blue-600 hover:text-blue-700">Save</button>
+                                                            <button className="text-sm text-blue-600 hover:text-blue-700">Share</button>
+                                                            <button className="text-sm text-blue-600 hover:text-blue-700">View Details</button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -597,9 +658,8 @@
                                     </>
                                 )}
                             </div>
-                            </div>
-                        </div>
-                    </main>
+                        </main>
+                    </div>
                 </div>
             );
         }
