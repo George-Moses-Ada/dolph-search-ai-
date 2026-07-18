@@ -84,6 +84,7 @@
                 articleAttribute: false,
                 articleTypes: []
             });
+            const [filteredResults, setFilteredResults] = useState([]);
             const timelineRef = useRef(null);
             const [displayOptionsOpen, setDisplayOptionsOpen] = useState(false);
             const [additionalFiltersOpen, setAdditionalFiltersOpen] = useState(false);
@@ -93,6 +94,46 @@
                 localStorage.removeItem('user');
                 setUser(null);
             };
+
+            const applyFilters = (allResults) => {
+                let filtered = [...allResults];
+
+                // Filter by publication date
+                if (selectedFilters.publicationDate) {
+                    const currentYear = new Date().getFullYear();
+                    const cutoffYear = currentYear - selectedFilters.publicationDate;
+                    filtered = filtered.filter(result => {
+                        const resultYear = parseInt(result.year) || 0;
+                        return resultYear >= cutoffYear;
+                    });
+                }
+
+                // Filter by text availability
+                if (selectedFilters.textAvailability.length > 0) {
+                    filtered = filtered.filter(result => {
+                        if (selectedFilters.textAvailability.includes('Abstract') && !result.abstract) return false;
+                        if (selectedFilters.textAvailability.includes('Free Full Text') && !result.url) return false;
+                        return true;
+                    });
+                }
+
+                // Filter by article type
+                if (selectedFilters.articleTypes.length > 0) {
+                    filtered = filtered.filter(result => {
+                        return selectedFilters.articleTypes.some(type => 
+                            result.articleType.toLowerCase().includes(type.toLowerCase())
+                        );
+                    });
+                }
+
+                return filtered;
+            };
+
+            useEffect(() => {
+                if (results.length > 0) {
+                    setFilteredResults(applyFilters(results));
+                }
+            }, [results, selectedFilters]);
 
             useEffect(() => {
                 // Load display options from localStorage
@@ -487,19 +528,47 @@
                                     <h3 className="font-semibold text-gray-900 mb-3">PUBLICATION DATE</h3>
                                     <div className="space-y-2" role="radiogroup" aria-label="Publication date filter">
                                         <label className="flex items-center">
-                                            <input type="radio" name="pubDate" className="mr-2" aria-label="1 Year" />
+                                            <input 
+                                                type="radio" 
+                                                name="pubDate" 
+                                                className="mr-2" 
+                                                aria-label="1 Year"
+                                                checked={selectedFilters.publicationDate === 1}
+                                                onChange={() => setSelectedFilters({...selectedFilters, publicationDate: 1})}
+                                            />
                                             <span className="text-sm">1 Year</span>
                                         </label>
                                         <label className="flex items-center">
-                                            <input type="radio" name="pubDate" className="mr-2" aria-label="5 Years" />
+                                            <input 
+                                                type="radio" 
+                                                name="pubDate" 
+                                                className="mr-2" 
+                                                aria-label="5 Years"
+                                                checked={selectedFilters.publicationDate === 5}
+                                                onChange={() => setSelectedFilters({...selectedFilters, publicationDate: 5})}
+                                            />
                                             <span className="text-sm">5 Years</span>
                                         </label>
                                         <label className="flex items-center">
-                                            <input type="radio" name="pubDate" className="mr-2" aria-label="10 Years" />
+                                            <input 
+                                                type="radio" 
+                                                name="pubDate" 
+                                                className="mr-2" 
+                                                aria-label="10 Years"
+                                                checked={selectedFilters.publicationDate === 10}
+                                                onChange={() => setSelectedFilters({...selectedFilters, publicationDate: 10})}
+                                            />
                                             <span className="text-sm">10 Years</span>
                                         </label>
                                         <label className="flex items-center">
-                                            <input type="radio" name="pubDate" className="mr-2" aria-label="Custom Range" />
+                                            <input 
+                                                type="radio" 
+                                                name="pubDate" 
+                                                className="mr-2" 
+                                                aria-label="Custom Range"
+                                                checked={selectedFilters.publicationDate === null}
+                                                onChange={() => setSelectedFilters({...selectedFilters, publicationDate: null})}
+                                            />
                                             <span className="text-sm">Custom Range</span>
                                         </label>
                                     </div>
@@ -510,15 +579,51 @@
                                     <h3 className="font-semibold text-gray-900 mb-3">TEXT AVAILABILITY</h3>
                                     <div className="space-y-2" role="group" aria-label="Text availability filter">
                                         <label className="flex items-center">
-                                            <input type="checkbox" className="mr-2" aria-label="Abstract" />
+                                            <input 
+                                                type="checkbox" 
+                                                className="mr-2" 
+                                                aria-label="Abstract"
+                                                checked={selectedFilters.textAvailability.includes('Abstract')}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) {
+                                                        setSelectedFilters({...selectedFilters, textAvailability: [...selectedFilters.textAvailability, 'Abstract']});
+                                                    } else {
+                                                        setSelectedFilters({...selectedFilters, textAvailability: selectedFilters.textAvailability.filter(t => t !== 'Abstract')});
+                                                    }
+                                                }}
+                                            />
                                             <span className="text-sm">Abstract</span>
                                         </label>
                                         <label className="flex items-center">
-                                            <input type="checkbox" className="mr-2" aria-label="Free Full Text" />
+                                            <input 
+                                                type="checkbox" 
+                                                className="mr-2" 
+                                                aria-label="Free Full Text"
+                                                checked={selectedFilters.textAvailability.includes('Free Full Text')}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) {
+                                                        setSelectedFilters({...selectedFilters, textAvailability: [...selectedFilters.textAvailability, 'Free Full Text']});
+                                                    } else {
+                                                        setSelectedFilters({...selectedFilters, textAvailability: selectedFilters.textAvailability.filter(t => t !== 'Free Full Text')});
+                                                    }
+                                                }}
+                                            />
                                             <span className="text-sm">Free Full Text</span>
                                         </label>
                                         <label className="flex items-center">
-                                            <input type="checkbox" className="mr-2" aria-label="Full Text" />
+                                            <input 
+                                                type="checkbox" 
+                                                className="mr-2" 
+                                                aria-label="Full Text"
+                                                checked={selectedFilters.textAvailability.includes('Full Text')}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) {
+                                                        setSelectedFilters({...selectedFilters, textAvailability: [...selectedFilters.textAvailability, 'Full Text']});
+                                                    } else {
+                                                        setSelectedFilters({...selectedFilters, textAvailability: selectedFilters.textAvailability.filter(t => t !== 'Full Text')});
+                                                    }
+                                                }}
+                                            />
                                             <span className="text-sm">Full Text</span>
                                         </label>
                                     </div>
@@ -538,27 +643,93 @@
                                     <h3 className="font-semibold text-gray-900 mb-3">ARTICLE TYPE</h3>
                                     <div className="space-y-2">
                                         <label className="flex items-center">
-                                            <input type="checkbox" className="mr-2" />
+                                            <input 
+                                                type="checkbox" 
+                                                className="mr-2"
+                                                checked={selectedFilters.articleTypes.includes('Books and Documents')}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) {
+                                                        setSelectedFilters({...selectedFilters, articleTypes: [...selectedFilters.articleTypes, 'Books and Documents']});
+                                                    } else {
+                                                        setSelectedFilters({...selectedFilters, articleTypes: selectedFilters.articleTypes.filter(t => t !== 'Books and Documents')});
+                                                    }
+                                                }}
+                                            />
                                             <span className="text-sm">Books and Documents</span>
                                         </label>
                                         <label className="flex items-center">
-                                            <input type="checkbox" className="mr-2" />
+                                            <input 
+                                                type="checkbox" 
+                                                className="mr-2"
+                                                checked={selectedFilters.articleTypes.includes('Clinical Trial')}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) {
+                                                        setSelectedFilters({...selectedFilters, articleTypes: [...selectedFilters.articleTypes, 'Clinical Trial']});
+                                                    } else {
+                                                        setSelectedFilters({...selectedFilters, articleTypes: selectedFilters.articleTypes.filter(t => t !== 'Clinical Trial')});
+                                                    }
+                                                }}
+                                            />
                                             <span className="text-sm">Clinical Trial</span>
                                         </label>
                                         <label className="flex items-center">
-                                            <input type="checkbox" className="mr-2" />
+                                            <input 
+                                                type="checkbox" 
+                                                className="mr-2"
+                                                checked={selectedFilters.articleTypes.includes('Meta Analysis')}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) {
+                                                        setSelectedFilters({...selectedFilters, articleTypes: [...selectedFilters.articleTypes, 'Meta Analysis']});
+                                                    } else {
+                                                        setSelectedFilters({...selectedFilters, articleTypes: selectedFilters.articleTypes.filter(t => t !== 'Meta Analysis')});
+                                                    }
+                                                }}
+                                            />
                                             <span className="text-sm">Meta Analysis</span>
                                         </label>
                                         <label className="flex items-center">
-                                            <input type="checkbox" className="mr-2" />
+                                            <input 
+                                                type="checkbox" 
+                                                className="mr-2"
+                                                checked={selectedFilters.articleTypes.includes('Randomized Controlled Trial')}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) {
+                                                        setSelectedFilters({...selectedFilters, articleTypes: [...selectedFilters.articleTypes, 'Randomized Controlled Trial']});
+                                                    } else {
+                                                        setSelectedFilters({...selectedFilters, articleTypes: selectedFilters.articleTypes.filter(t => t !== 'Randomized Controlled Trial')});
+                                                    }
+                                                }}
+                                            />
                                             <span className="text-sm">Randomized Controlled Trial</span>
                                         </label>
                                         <label className="flex items-center">
-                                            <input type="checkbox" className="mr-2" />
+                                            <input 
+                                                type="checkbox" 
+                                                className="mr-2"
+                                                checked={selectedFilters.articleTypes.includes('Review')}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) {
+                                                        setSelectedFilters({...selectedFilters, articleTypes: [...selectedFilters.articleTypes, 'Review']});
+                                                    } else {
+                                                        setSelectedFilters({...selectedFilters, articleTypes: selectedFilters.articleTypes.filter(t => t !== 'Review')});
+                                                    }
+                                                }}
+                                            />
                                             <span className="text-sm">Review</span>
                                         </label>
                                         <label className="flex items-center">
-                                            <input type="checkbox" className="mr-2" />
+                                            <input 
+                                                type="checkbox" 
+                                                className="mr-2"
+                                                checked={selectedFilters.articleTypes.includes('Systematic Review')}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) {
+                                                        setSelectedFilters({...selectedFilters, articleTypes: [...selectedFilters.articleTypes, 'Systematic Review']});
+                                                    } else {
+                                                        setSelectedFilters({...selectedFilters, articleTypes: selectedFilters.articleTypes.filter(t => t !== 'Systematic Review')});
+                                                    }
+                                                }}
+                                            />
                                             <span className="text-sm">Systematic Review</span>
                                         </label>
                                     </div>
@@ -577,10 +748,26 @@
 
                                 {/* Filter Actions */}
                                 <div className="border-t border-gray-200 pt-4 space-y-2">
-                                    <button className="w-full text-sm text-gray-600 hover:text-gray-900 py-2 border border-gray-300 rounded hover:bg-gray-50">
+                                    <button 
+                                        onClick={() => setSelectedFilters({
+                                            publicationDate: null,
+                                            textAvailability: [],
+                                            articleAttribute: false,
+                                            articleTypes: []
+                                        })}
+                                        className="w-full text-sm text-gray-600 hover:text-gray-900 py-2 border border-gray-300 rounded hover:bg-gray-50"
+                                    >
                                         Clear Applied Filters
                                     </button>
-                                    <button className="w-full text-sm text-gray-600 hover:text-gray-900 py-2 border border-gray-300 rounded hover:bg-gray-50">
+                                    <button 
+                                        onClick={() => setSelectedFilters({
+                                            publicationDate: null,
+                                            textAvailability: [],
+                                            articleAttribute: false,
+                                            articleTypes: []
+                                        })}
+                                        className="w-full text-sm text-gray-600 hover:text-gray-900 py-2 border border-gray-300 rounded hover:bg-gray-50"
+                                    >
                                         Reset Filters Menu
                                     </button>
                                 </div>
@@ -618,8 +805,8 @@
 
                                 {/* Results Header */}
                                 <div className="mb-4">
-                                    <h1 className="text-2xl font-bold text-gray-900">{results.length.toLocaleString()} Results</h1>
-                                    <p className="text-sm text-gray-600">Page 1 of {Math.ceil(results.length / displayOptions.resultsPerPage).toLocaleString()}</p>
+                                    <h1 className="text-2xl font-bold text-gray-900">{filteredResults.length.toLocaleString()} Results</h1>
+                                    <p className="text-sm text-gray-600">Page 1 of {Math.ceil(filteredResults.length / displayOptions.resultsPerPage).toLocaleString()}</p>
                                     <div className="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
                                         <p className="text-sm text-gray-700">
                                             <span className="font-medium">Query:</span> "{query}"
@@ -644,7 +831,7 @@
                                     <>
                                         {/* Results list */}
                                         <div className="space-y-4 mb-6">
-                                            {results.map(result => (
+                                            {filteredResults.map(result => (
                                                 <div key={result.id} className={`result-item bg-white rounded-lg shadow-sm border border-gray-200 ${getDensityClass()}`}>
                                                     <div className="flex flex-col lg:flex-row lg:items-start gap-4">
                                                         <div className="flex items-start gap-4 w-full">
@@ -704,7 +891,7 @@
 
                                         {/* Summary */}
                                         {(() => {
-                                            const summary = generateSummary(query, results);
+                                            const summary = generateSummary(query, filteredResults);
                                             return (
                                                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
                                                     <h3 className="text-lg font-semibold text-blue-900 mb-2">AI Summary</h3>
