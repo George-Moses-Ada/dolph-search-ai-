@@ -390,6 +390,7 @@
                                     onChange={(e) => setQuery(e.target.value)}
                                     placeholder="Search for research papers..."
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    aria-label="Search query"
                                 />
                                 <button
                                     onClick={() => performSearch(query, searchTypes)}
@@ -404,6 +405,8 @@
                             <button
                                 onClick={() => setSidebarOpen(!sidebarOpen)}
                                 className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
+                                aria-label="Toggle filters menu"
+                                aria-expanded={sidebarOpen}
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -482,21 +485,21 @@
                                 {/* Publication Date */}
                                 <div className="mb-6">
                                     <h3 className="font-semibold text-gray-900 mb-3">PUBLICATION DATE</h3>
-                                    <div className="space-y-2">
+                                    <div className="space-y-2" role="radiogroup" aria-label="Publication date filter">
                                         <label className="flex items-center">
-                                            <input type="radio" name="pubDate" className="mr-2" />
+                                            <input type="radio" name="pubDate" className="mr-2" aria-label="1 Year" />
                                             <span className="text-sm">1 Year</span>
                                         </label>
                                         <label className="flex items-center">
-                                            <input type="radio" name="pubDate" className="mr-2" />
+                                            <input type="radio" name="pubDate" className="mr-2" aria-label="5 Years" />
                                             <span className="text-sm">5 Years</span>
                                         </label>
                                         <label className="flex items-center">
-                                            <input type="radio" name="pubDate" className="mr-2" />
+                                            <input type="radio" name="pubDate" className="mr-2" aria-label="10 Years" />
                                             <span className="text-sm">10 Years</span>
                                         </label>
                                         <label className="flex items-center">
-                                            <input type="radio" name="pubDate" className="mr-2" />
+                                            <input type="radio" name="pubDate" className="mr-2" aria-label="Custom Range" />
                                             <span className="text-sm">Custom Range</span>
                                         </label>
                                     </div>
@@ -505,17 +508,17 @@
                                 {/* Text Availability */}
                                 <div className="mb-6">
                                     <h3 className="font-semibold text-gray-900 mb-3">TEXT AVAILABILITY</h3>
-                                    <div className="space-y-2">
+                                    <div className="space-y-2" role="group" aria-label="Text availability filter">
                                         <label className="flex items-center">
-                                            <input type="checkbox" className="mr-2" />
+                                            <input type="checkbox" className="mr-2" aria-label="Abstract" />
                                             <span className="text-sm">Abstract</span>
                                         </label>
                                         <label className="flex items-center">
-                                            <input type="checkbox" className="mr-2" />
+                                            <input type="checkbox" className="mr-2" aria-label="Free Full Text" />
                                             <span className="text-sm">Free Full Text</span>
                                         </label>
                                         <label className="flex items-center">
-                                            <input type="checkbox" className="mr-2" />
+                                            <input type="checkbox" className="mr-2" aria-label="Full Text" />
                                             <span className="text-sm">Full Text</span>
                                         </label>
                                     </div>
@@ -637,7 +640,7 @@
                                                 <div key={result.id} className={`result-item bg-white rounded-lg shadow-sm border border-gray-200 ${getDensityClass()}`}>
                                                     <div className="flex flex-col lg:flex-row lg:items-start gap-4">
                                                         <div className="flex items-start gap-4 w-full">
-                                                            <input type="checkbox" className="mt-1" />
+                                                            <input type="checkbox" className="mt-1" aria-label={`Select result ${result.id}`} />
                                                             <div className="flex-1">
                                                                 <h3 className="text-base lg:text-lg font-semibold text-[#111827] mb-2 hover:text-blue-600 cursor-pointer">
                                                                     {result.title}
