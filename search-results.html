@@ -281,15 +281,26 @@
                     const transformedResults = data.results.map((result, index) => {
                         // Try multiple possible field names for citations
                         let citationCount = 0;
-                        if (result.citationCount) citationCount = parseInt(result.citationCount);
-                        else if (result.citations) citationCount = parseInt(result.citations);
-                        else if (result.cited_by) citationCount = parseInt(result.cited_by);
-                        else if (result.citedBy) citationCount = parseInt(result.citedBy);
-                        else if (result['citation-count']) citationCount = parseInt(result['citation-count']);
-                        else if (result.citation_count) citationCount = parseInt(result.citation_count);
-                        else if (result.CitationCount) citationCount = parseInt(result.CitationCount);
-                        else if (result.Citations) citationCount = parseInt(result.Citations);
-                        
+                        let citationField = null;
+
+                        // Check for citation fields
+                        if (result.citationCount) citationField = result.citationCount;
+                        else if (result.citations) citationField = result.citations;
+                        else if (result.cited_by) citationField = result.cited_by;
+                        else if (result.citedBy) citationField = result.citedBy;
+                        else if (result['citation-count']) citationField = result['citation-count'];
+                        else if (result.citation_count) citationField = result.citation_count;
+                        else if (result.CitationCount) citationField = result.CitationCount;
+                        else if (result.Citations) citationField = result.Citations;
+
+                        // If citation field is a string with commas, count the items
+                        if (citationField && typeof citationField === 'string') {
+                            const items = citationField.split(',').map(item => item.trim()).filter(item => item.length > 0);
+                            citationCount = items.length;
+                        } else if (citationField && typeof citationField === 'number') {
+                            citationCount = citationField;
+                        }
+
                         return {
                             id: index + 1,
                             title: result.title || 'No title',
