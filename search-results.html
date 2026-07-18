@@ -272,22 +272,32 @@
                         throw new Error(data.error || 'Search failed');
                     }
 
-                    const transformedResults = data.results.map((result, index) => ({
-                        id: index + 1,
-                        title: result.title || 'No title',
-                        authors: result.authors || '',
-                        journal: result.journal || '',
-                        year: result.publicationDate || result.year || '',
-                        abstract: result.abstract || '',
-                        confidence: 85,
-                        citations: result.citationCount || result.citations || result.cited_by || 0,
-                        doi: result.doi || '',
-                        relevance: 'High',
-                        source: result.source,
-                        url: result.url || result.link || '',
-                        articleType: result.articleType || result.type || 'Article',
-                        keywords: result.keywords || ['research', 'study', 'analysis']
-                    }));
+                    const transformedResults = data.results.map((result, index) => {
+                        // Try multiple possible field names for citations
+                        let citationCount = 0;
+                        if (result.citationCount) citationCount = parseInt(result.citationCount);
+                        else if (result.citations) citationCount = parseInt(result.citations);
+                        else if (result.cited_by) citationCount = parseInt(result.cited_by);
+                        else if (result.citedBy) citationCount = parseInt(result.citedBy);
+                        else if (result['citation-count']) citationCount = parseInt(result['citation-count']);
+                        
+                        return {
+                            id: index + 1,
+                            title: result.title || 'No title',
+                            authors: result.authors || '',
+                            journal: result.journal || '',
+                            year: result.publicationDate || result.year || '',
+                            abstract: result.abstract || '',
+                            confidence: 85,
+                            citations: citationCount || 0,
+                            doi: result.doi || '',
+                            relevance: 'High',
+                            source: result.source,
+                            url: result.url || result.link || '',
+                            articleType: result.articleType || result.type || 'Article',
+                            keywords: result.keywords || ['research', 'study', 'analysis']
+                        };
+                    });
 
                     console.log('API Results sample:', data.results.slice(0, 2));
                     console.log('Transformed Results sample:', transformedResults.slice(0, 2));
@@ -335,6 +345,9 @@
             };
 
             const generateSummary = (searchQuery, results) => {
+                console.log('Generating summary for', results.length, 'results');
+                console.log('Sample citations:', results.slice(0, 3).map(r => r.citations));
+
                 if (results.length === 0) {
                     return {
                         text: `No results found for "${searchQuery}". Try adjusting your search terms or selecting different sources.`,
@@ -365,6 +378,8 @@
 
                 const totalCitations = results.reduce((sum, r) => sum + (r.citations || 0), 0);
                 const avgCitations = results.length > 0 ? Math.round(totalCitations / results.length) : 0;
+
+                console.log('Total citations:', totalCitations, 'Average:', avgCitations);
 
                 let consensus = 'Moderate';
                 if (avgConfidence >= 90) consensus = 'Strong';
