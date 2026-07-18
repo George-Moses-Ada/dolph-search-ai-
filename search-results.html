@@ -85,6 +85,8 @@
                 articleTypes: []
             });
             const timelineRef = useRef(null);
+            const [displayOptionsOpen, setDisplayOptionsOpen] = useState(false);
+            const [additionalFiltersOpen, setAdditionalFiltersOpen] = useState(false);
 
             const handleLogout = () => {
                 localStorage.removeItem('token');
@@ -93,6 +95,12 @@
             };
 
             useEffect(() => {
+                // Load display options from localStorage
+                const savedDisplayOptions = localStorage.getItem('displayOptions');
+                if (savedDisplayOptions) {
+                    setDisplayOptions(JSON.parse(savedDisplayOptions));
+                }
+
                 // Check if user is logged in
                 const userData = localStorage.getItem('user');
                 if (userData) {
@@ -526,7 +534,10 @@
 
                                 {/* Additional Filters */}
                                 <div className="mb-6">
-                                    <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+                                    <button 
+                                        onClick={() => setAdditionalFiltersOpen(true)}
+                                        className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+                                    >
                                         Additional Filters +
                                     </button>
                                 </div>
@@ -564,7 +575,12 @@
                                         <option>Most Cited</option>
                                         <option>Alphabetical</option>
                                     </select>
-                                    <button className="text-sm text-gray-600 hover:text-gray-900">Display Options ⚙</button>
+                                    <button 
+                                        onClick={() => setDisplayOptionsOpen(true)}
+                                        className="text-sm text-gray-600 hover:text-gray-900"
+                                    >
+                                        Display Options ⚙
+                                    </button>
                                 </div>
 
                                 {/* Results Header */}
@@ -659,6 +675,292 @@
                                 )}
                             </div>
                         </main>
+
+                        {/* Display Options Modal */}
+                        {displayOptionsOpen && (
+                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                                <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h2 className="text-lg font-semibold">Display Options</h2>
+                                        <button 
+                                            onClick={() => setDisplayOptionsOpen(false)}
+                                            className="text-gray-500 hover:text-gray-700"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+
+                                    {/* Density */}
+                                    <div className="mb-4">
+                                        <h3 className="font-medium mb-2">Density</h3>
+                                        <div className="space-y-2">
+                                            <label className="flex items-center">
+                                                <input 
+                                                    type="radio" 
+                                                    name="density" 
+                                                    value="compact"
+                                                    checked={displayOptions.density === 'compact'}
+                                                    onChange={(e) => setDisplayOptions({...displayOptions, density: e.target.value})}
+                                                    className="mr-2"
+                                                />
+                                                <span className="text-sm">Compact</span>
+                                            </label>
+                                            <label className="flex items-center">
+                                                <input 
+                                                    type="radio" 
+                                                    name="density" 
+                                                    value="comfortable"
+                                                    checked={displayOptions.density === 'comfortable'}
+                                                    onChange={(e) => setDisplayOptions({...displayOptions, density: e.target.value})}
+                                                    className="mr-2"
+                                                />
+                                                <span className="text-sm">Comfortable</span>
+                                            </label>
+                                            <label className="flex items-center">
+                                                <input 
+                                                    type="radio" 
+                                                    name="density" 
+                                                    value="spacious"
+                                                    checked={displayOptions.density === 'spacious'}
+                                                    onChange={(e) => setDisplayOptions({...displayOptions, density: e.target.value})}
+                                                    className="mr-2"
+                                                />
+                                                <span className="text-sm">Spacious</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    {/* Visible Fields */}
+                                    <div className="mb-4">
+                                        <h3 className="font-medium mb-2">Visible Fields</h3>
+                                        <div className="space-y-2">
+                                            <label className="flex items-center">
+                                                <input 
+                                                    type="checkbox"
+                                                    checked={displayOptions.showAuthors}
+                                                    onChange={(e) => setDisplayOptions({...displayOptions, showAuthors: e.target.checked})}
+                                                    className="mr-2"
+                                                />
+                                                <span className="text-sm">Authors</span>
+                                            </label>
+                                            <label className="flex items-center">
+                                                <input 
+                                                    type="checkbox"
+                                                    checked={displayOptions.showAbstract}
+                                                    onChange={(e) => setDisplayOptions({...displayOptions, showAbstract: e.target.checked})}
+                                                    className="mr-2"
+                                                />
+                                                <span className="text-sm">Abstract</span>
+                                            </label>
+                                            <label className="flex items-center">
+                                                <input 
+                                                    type="checkbox"
+                                                    checked={displayOptions.showJournal}
+                                                    onChange={(e) => setDisplayOptions({...displayOptions, showJournal: e.target.checked})}
+                                                    className="mr-2"
+                                                />
+                                                <span className="text-sm">Journal</span>
+                                            </label>
+                                            <label className="flex items-center">
+                                                <input 
+                                                    type="checkbox"
+                                                    checked={displayOptions.showDOI}
+                                                    onChange={(e) => setDisplayOptions({...displayOptions, showDOI: e.target.checked})}
+                                                    className="mr-2"
+                                                />
+                                                <span className="text-sm">DOI</span>
+                                            </label>
+                                            <label className="flex items-center">
+                                                <input 
+                                                    type="checkbox"
+                                                    checked={displayOptions.showKeywords}
+                                                    onChange={(e) => setDisplayOptions({...displayOptions, showKeywords: e.target.checked})}
+                                                    className="mr-2"
+                                                />
+                                                <span className="text-sm">Keywords</span>
+                                            </label>
+                                            <label className="flex items-center">
+                                                <input 
+                                                    type="checkbox"
+                                                    checked={displayOptions.showCitations}
+                                                    onChange={(e) => setDisplayOptions({...displayOptions, showCitations: e.target.checked})}
+                                                    className="mr-2"
+                                                />
+                                                <span className="text-sm">Citations</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    {/* Results Per Page */}
+                                    <div className="mb-4">
+                                        <h3 className="font-medium mb-2">Results Per Page</h3>
+                                        <select 
+                                            value={displayOptions.resultsPerPage}
+                                            onChange={(e) => setDisplayOptions({...displayOptions, resultsPerPage: parseInt(e.target.value)})}
+                                            className="w-full border border-gray-300 rounded px-3 py-2"
+                                        >
+                                            <option value={10}>10</option>
+                                            <option value={20}>20</option>
+                                            <option value={50}>50</option>
+                                            <option value={100}>100</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="flex justify-end gap-2">
+                                        <button 
+                                            onClick={() => setDisplayOptionsOpen(false)}
+                                            className="px-4 py-2 text-gray-600 hover:text-gray-900"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button 
+                                            onClick={() => {
+                                                localStorage.setItem('displayOptions', JSON.stringify(displayOptions));
+                                                setDisplayOptionsOpen(false);
+                                            }}
+                                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                        >
+                                            Save
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Additional Filters Modal */}
+                        {additionalFiltersOpen && (
+                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                                <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h2 className="text-lg font-semibold">Additional Filters</h2>
+                                        <button 
+                                            onClick={() => setAdditionalFiltersOpen(false)}
+                                            className="text-gray-500 hover:text-gray-700"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {/* Language */}
+                                        <div className="mb-4">
+                                            <h3 className="font-medium mb-2">Language</h3>
+                                            <input type="text" placeholder="Search languages..." className="w-full border border-gray-300 rounded px-3 py-2" />
+                                        </div>
+
+                                        {/* Journal */}
+                                        <div className="mb-4">
+                                            <h3 className="font-medium mb-2">Journal</h3>
+                                            <input type="text" placeholder="Search journals..." className="w-full border border-gray-300 rounded px-3 py-2" />
+                                        </div>
+
+                                        {/* Publisher */}
+                                        <div className="mb-4">
+                                            <h3 className="font-medium mb-2">Publisher</h3>
+                                            <input type="text" placeholder="Search publishers..." className="w-full border border-gray-300 rounded px-3 py-2" />
+                                        </div>
+
+                                        {/* Author */}
+                                        <div className="mb-4">
+                                            <h3 className="font-medium mb-2">Author</h3>
+                                            <input type="text" placeholder="Search authors..." className="w-full border border-gray-300 rounded px-3 py-2" />
+                                        </div>
+
+                                        {/* Affiliation */}
+                                        <div className="mb-4">
+                                            <h3 className="font-medium mb-2">Affiliation</h3>
+                                            <input type="text" placeholder="Search affiliations..." className="w-full border border-gray-300 rounded px-3 py-2" />
+                                        </div>
+
+                                        {/* Institution */}
+                                        <div className="mb-4">
+                                            <h3 className="font-medium mb-2">Institution</h3>
+                                            <input type="text" placeholder="Search institutions..." className="w-full border border-gray-300 rounded px-3 py-2" />
+                                        </div>
+
+                                        {/* Country */}
+                                        <div className="mb-4">
+                                            <h3 className="font-medium mb-2">Country</h3>
+                                            <input type="text" placeholder="Search countries..." className="w-full border border-gray-300 rounded px-3 py-2" />
+                                        </div>
+
+                                        {/* Species */}
+                                        <div className="mb-4">
+                                            <h3 className="font-medium mb-2">Species</h3>
+                                            <input type="text" placeholder="Search species..." className="w-full border border-gray-300 rounded px-3 py-2" />
+                                        </div>
+
+                                        {/* Gender */}
+                                        <div className="mb-4">
+                                            <h3 className="font-medium mb-2">Gender</h3>
+                                            <select className="w-full border border-gray-300 rounded px-3 py-2">
+                                                <option value="">All</option>
+                                                <option value="male">Male</option>
+                                                <option value="female">Female</option>
+                                            </select>
+                                        </div>
+
+                                        {/* Age */}
+                                        <div className="mb-4">
+                                            <h3 className="font-medium mb-2">Age</h3>
+                                            <input type="text" placeholder="Age range..." className="w-full border border-gray-300 rounded px-3 py-2" />
+                                        </div>
+
+                                        {/* Publication Status */}
+                                        <div className="mb-4">
+                                            <h3 className="font-medium mb-2">Publication Status</h3>
+                                            <select className="w-full border border-gray-300 rounded px-3 py-2">
+                                                <option value="">All</option>
+                                                <option value="published">Published</option>
+                                                <option value="aheadofprint">Ahead of Print</option>
+                                            </select>
+                                        </div>
+
+                                        {/* Open Access */}
+                                        <div className="mb-4">
+                                            <h3 className="font-medium mb-2">Open Access</h3>
+                                            <label className="flex items-center">
+                                                <input type="checkbox" className="mr-2" />
+                                                <span className="text-sm">Open Access only</span>
+                                            </label>
+                                        </div>
+
+                                        {/* Citation Count */}
+                                        <div className="mb-4">
+                                            <h3 className="font-medium mb-2">Citation Count</h3>
+                                            <div className="flex gap-2">
+                                                <input type="number" placeholder="Min" className="w-full border border-gray-300 rounded px-3 py-2" />
+                                                <input type="number" placeholder="Max" className="w-full border border-gray-300 rounded px-3 py-2" />
+                                            </div>
+                                        </div>
+
+                                        {/* Impact Factor */}
+                                        <div className="mb-4">
+                                            <h3 className="font-medium mb-2">Impact Factor</h3>
+                                            <div className="flex gap-2">
+                                                <input type="number" placeholder="Min" className="w-full border border-gray-300 rounded px-3 py-2" />
+                                                <input type="number" placeholder="Max" className="w-full border border-gray-300 rounded px-3 py-2" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex justify-end gap-2 mt-6">
+                                        <button 
+                                            onClick={() => setAdditionalFiltersOpen(false)}
+                                            className="px-4 py-2 text-gray-600 hover:text-gray-900"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button 
+                                            onClick={() => setAdditionalFiltersOpen(false)}
+                                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                        >
+                                            Apply Filters
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             );
