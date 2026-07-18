@@ -103,8 +103,19 @@
                     const currentYear = new Date().getFullYear();
                     const cutoffYear = currentYear - selectedFilters.publicationDate;
                     filtered = filtered.filter(result => {
-                        const resultYear = parseInt(result.year) || 0;
-                        console.log(`Filtering by year: resultYear=${resultYear}, cutoffYear=${cutoffYear}, passes=${resultYear >= cutoffYear}`);
+                        // Handle different year formats: "2023", "2023-01-01", etc.
+                        let resultYear = 0;
+                        if (result.year) {
+                            const yearStr = String(result.year);
+                            // Extract 4-digit year from string
+                            const yearMatch = yearStr.match(/\d{4}/);
+                            if (yearMatch) {
+                                resultYear = parseInt(yearMatch[0]);
+                            } else {
+                                resultYear = parseInt(yearStr) || 0;
+                            }
+                        }
+                        console.log(`Filtering by year: result.year="${result.year}", resultYear=${resultYear}, cutoffYear=${cutoffYear}, passes=${resultYear >= cutoffYear}`);
                         return resultYear >= cutoffYear;
                     });
                     console.log(`After publication date filter: ${filtered.length} results`);
