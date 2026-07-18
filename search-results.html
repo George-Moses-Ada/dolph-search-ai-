@@ -620,6 +620,14 @@
                                 <div className="mb-4">
                                     <h1 className="text-2xl font-bold text-gray-900">{results.length.toLocaleString()} Results</h1>
                                     <p className="text-sm text-gray-600">Page 1 of {Math.ceil(results.length / displayOptions.resultsPerPage).toLocaleString()}</p>
+                                    <div className="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                        <p className="text-sm text-gray-700">
+                                            <span className="font-medium">Query:</span> "{query}"
+                                        </p>
+                                        <p className="text-sm text-gray-700">
+                                            <span className="font-medium">Search Types:</span> {searchTypes.join(', ')}
+                                        </p>
+                                    </div>
                                 </div>
 
                                 {/* Loading state */}
