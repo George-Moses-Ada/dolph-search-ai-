@@ -104,8 +104,10 @@
                     const cutoffYear = currentYear - selectedFilters.publicationDate;
                     filtered = filtered.filter(result => {
                         const resultYear = parseInt(result.year) || 0;
+                        console.log(`Filtering by year: resultYear=${resultYear}, cutoffYear=${cutoffYear}, passes=${resultYear >= cutoffYear}`);
                         return resultYear >= cutoffYear;
                     });
+                    console.log(`After publication date filter: ${filtered.length} results`);
                 }
 
                 // Filter by text availability
@@ -115,6 +117,7 @@
                         if (selectedFilters.textAvailability.includes('Free Full Text') && !result.url) return false;
                         return true;
                     });
+                    console.log(`After text availability filter: ${filtered.length} results`);
                 }
 
                 // Filter by article type
@@ -124,6 +127,7 @@
                             result.articleType.toLowerCase().includes(type.toLowerCase())
                         );
                     });
+                    console.log(`After article type filter: ${filtered.length} results`);
                 }
 
                 return filtered;
@@ -257,18 +261,20 @@
                         title: result.title || 'No title',
                         authors: result.authors || '',
                         journal: result.journal || '',
-                        year: result.publicationDate || '',
+                        year: result.publicationDate || result.year || '',
                         abstract: result.abstract || '',
                         confidence: 85,
-                        citations: result.citationCount || 0,
+                        citations: result.citationCount || result.citations || result.cited_by || 0,
                         doi: result.doi || '',
                         relevance: 'High',
                         source: result.source,
-                        url: result.url || '',
-                        articleType: 'Article',
-                        keywords: ['research', 'study', 'analysis']
+                        url: result.url || result.link || '',
+                        articleType: result.articleType || result.type || 'Article',
+                        keywords: result.keywords || ['research', 'study', 'analysis']
                     }));
 
+                    console.log('API Results sample:', data.results.slice(0, 2));
+                    console.log('Transformed Results sample:', transformedResults.slice(0, 2));
                     setResults(transformedResults);
                 } catch (error) {
                     console.error('Search error:', error);
@@ -534,7 +540,10 @@
                                                 className="mr-2" 
                                                 aria-label="1 Year"
                                                 checked={selectedFilters.publicationDate === 1}
-                                                onChange={() => setSelectedFilters({...selectedFilters, publicationDate: 1})}
+                                                onChange={() => {
+                                                    console.log('Setting publication date to 1 year');
+                                                    setSelectedFilters({...selectedFilters, publicationDate: 1});
+                                                }}
                                             />
                                             <span className="text-sm">1 Year</span>
                                         </label>
@@ -545,7 +554,10 @@
                                                 className="mr-2" 
                                                 aria-label="5 Years"
                                                 checked={selectedFilters.publicationDate === 5}
-                                                onChange={() => setSelectedFilters({...selectedFilters, publicationDate: 5})}
+                                                onChange={() => {
+                                                    console.log('Setting publication date to 5 years');
+                                                    setSelectedFilters({...selectedFilters, publicationDate: 5});
+                                                }}
                                             />
                                             <span className="text-sm">5 Years</span>
                                         </label>
@@ -556,7 +568,10 @@
                                                 className="mr-2" 
                                                 aria-label="10 Years"
                                                 checked={selectedFilters.publicationDate === 10}
-                                                onChange={() => setSelectedFilters({...selectedFilters, publicationDate: 10})}
+                                                onChange={() => {
+                                                    console.log('Setting publication date to 10 years');
+                                                    setSelectedFilters({...selectedFilters, publicationDate: 10});
+                                                }}
                                             />
                                             <span className="text-sm">10 Years</span>
                                         </label>
@@ -567,7 +582,10 @@
                                                 className="mr-2" 
                                                 aria-label="Custom Range"
                                                 checked={selectedFilters.publicationDate === null}
-                                                onChange={() => setSelectedFilters({...selectedFilters, publicationDate: null})}
+                                                onChange={() => {
+                                                    console.log('Clearing publication date filter');
+                                                    setSelectedFilters({...selectedFilters, publicationDate: null});
+                                                }}
                                             />
                                             <span className="text-sm">Custom Range</span>
                                         </label>
