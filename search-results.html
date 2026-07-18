@@ -942,16 +942,44 @@
                                                                     )}
                                                                 </div>
                                                                 <div className="flex flex-wrap gap-2 lg:hidden">
-                                                                    <button className="text-sm text-blue-600 hover:text-blue-700 px-3 py-1 border border-blue-600 rounded">Save</button>
-                                                                    <button className="text-sm text-blue-600 hover:text-blue-700 px-3 py-1 border border-blue-600 rounded">Share</button>
-                                                                    <button className="text-sm text-blue-600 hover:text-blue-700 px-3 py-1 border border-blue-600 rounded">View Details</button>
+                                                                    <button 
+                                                                        onClick={() => window.open(result.url || '#', '_blank')}
+                                                                        className="text-sm text-blue-600 hover:text-blue-700 px-3 py-1 border border-blue-600 rounded"
+                                                                    >
+                                                                        View Paper
+                                                                    </button>
+                                                                    <div className="relative">
+                                                                        <select 
+                                                                            onChange={(e) => downloadPaper(result, e.target.value)}
+                                            className="text-sm text-blue-600 hover:text-blue-700 px-3 py-1 border border-blue-600 rounded appearance-none cursor-pointer"
+                                        >
+                                            <option value="">Download Paper ▼</option>
+                                            <option value="pdf">PDF</option>
+                                            <option value="txt">TXT</option>
+                                            <option value="doc">DOC</option>
+                                        </select>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                         <div className="hidden lg:flex flex-col gap-2">
-                                                            <button className="text-sm text-blue-600 hover:text-blue-700">Save</button>
-                                                            <button className="text-sm text-blue-600 hover:text-blue-700">Share</button>
-                                                            <button className="text-sm text-blue-600 hover:text-blue-700">View Details</button>
+                                                            <button 
+                                                                onClick={() => window.open(result.url || '#', '_blank')}
+                                                                className="text-sm text-blue-600 hover:text-blue-700"
+                                                            >
+                                                                View Paper
+                                                            </button>
+                                                            <div className="relative">
+                                                                <select 
+                                                                    onChange={(e) => downloadPaper(result, e.target.value)}
+                                                                    className="text-sm text-blue-600 hover:text-blue-700 appearance-none cursor-pointer"
+                                                                >
+                                                                    <option value="">Download Paper ▼</option>
+                                                                    <option value="pdf">PDF</option>
+                                                                    <option value="txt">TXT</option>
+                                                                    <option value="doc">DOC</option>
+                                                                </select>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
