@@ -269,6 +269,11 @@
                                         const index = elements[0].index;
                                         const year = years[index];
                                         console.log('Selected year:', year);
+                                        // Filter results by selected year
+                                        setSelectedFilters({
+                                            ...selectedFilters,
+                                            publicationDate: year
+                                        });
                                     }
                                 }
                             }
@@ -684,14 +689,14 @@
                                                 type="radio" 
                                                 name="pubDate" 
                                                 className="mr-2" 
-                                                aria-label="Custom Range"
+                                                aria-label="All"
                                                 checked={selectedFilters.publicationDate === null}
                                                 onChange={() => {
                                                     console.log('Clearing publication date filter');
                                                     setSelectedFilters({...selectedFilters, publicationDate: null});
                                                 }}
                                             />
-                                            <span className="text-sm">Custom Range</span>
+                                            <span className="text-sm">All</span>
                                         </label>
                                     </div>
                                 </div>
