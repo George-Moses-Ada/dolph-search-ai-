@@ -293,6 +293,9 @@
                         else if (result.citation_count) citationField = result.citation_count;
                         else if (result.CitationCount) citationField = result.CitationCount;
                         else if (result.Citations) citationField = result.Citations;
+                        else if (result.reference_count) citationField = result.reference_count;
+                        else if (result.ref_count) citationField = result.ref_count;
+                        else if (result.num_citations) citationField = result.num_citations;
 
                         // If citation field is a string with commas, count the items
                         if (citationField && typeof citationField === 'string') {
@@ -300,6 +303,28 @@
                             citationCount = items.length;
                         } else if (citationField && typeof citationField === 'number') {
                             citationCount = citationField;
+                        }
+
+                        // If no citation data found, try to extract from other fields
+                        if (citationCount === 0) {
+                            // Try to find comma-separated items in title or other fields
+                            const fieldsToCheck = [result.title, result.abstract, result.description, result.summary];
+                            for (const field of fieldsToCheck) {
+                                if (field && typeof field === 'string') {
+                                    // Look for patterns like "cited by X times" or similar
+                                    const citedByMatch = field.match(/cited\s+by\s+(\d+)/i);
+                                    if (citedByMatch) {
+                                        citationCount = parseInt(citedByMatch[1]);
+                                        break;
+                                    }
+                                    // Look for patterns like "X citations"
+                                    const citationsMatch = field.match(/(\d+)\s+citations?/i);
+                                    if (citationsMatch) {
+                                        citationCount = parseInt(citationsMatch[1]);
+                                        break;
+                                    }
+                                }
+                            }
                         }
 
                         return {
