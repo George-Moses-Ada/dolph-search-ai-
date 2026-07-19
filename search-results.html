@@ -204,8 +204,8 @@
                 if (timelineRef.current) {
                     const ctx = timelineRef.current.getContext('2d');
                     
-                    // Destroy existing chart if it exists
-                    if (window.timelineChart) {
+                    // Destroy existing chart if it exists and has destroy method
+                    if (window.timelineChart && typeof window.timelineChart.destroy === 'function') {
                         window.timelineChart.destroy();
                     }
                     
