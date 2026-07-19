@@ -9,6 +9,7 @@
     <script src="https://unpkg.com/@babel/standalone@7.22.0/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="config.js"></script>
     <style>
         body {
@@ -435,30 +436,60 @@
 
                     const filename = `${result.title.replace(/[^a-z0-9\s]/gi, '_').toLowerCase()}.${format}`;
                     
-                    let content = '';
-                    let mimeType = 'text/plain';
-                    
                     if (format === 'txt') {
-                        content = `${result.title}\n${result.authors}\n${result.journal}, ${result.year}\n\nAbstract:\n${result.abstract}\n\nDOI: ${result.doi}\nCitations: ${result.citations}`;
-                        mimeType = 'text/plain';
+                        const content = `${result.title}\n${result.authors}\n${result.journal}, ${result.year}\n\nAbstract:\n${result.abstract}\n\nDOI: ${result.doi}\nCitations: ${result.citations}`;
+                        const blob = new Blob([content], { type: 'text/plain' });
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = filename;
+                        a.style.display = 'none';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
                     } else if (format === 'doc') {
-                        content = `<html><head><title>${result.title}</title></head><body><h1>${result.title}</h1><p><strong>Authors:</strong> ${result.authors}</p><p><strong>Journal:</strong> ${result.journal}, ${result.year}</p><h2>Abstract</h2><p>${result.abstract}</p><p><strong>DOI:</strong> ${result.doi}</p><p><strong>Citations:</strong> ${result.citations}</p></body></html>`;
-                        mimeType = 'application/msword';
+                        const content = `<html><head><title>${result.title}</title></head><body><h1>${result.title}</h1><p><strong>Authors:</strong> ${result.authors}</p><p><strong>Journal:</strong> ${result.journal}, ${result.year}</p><h2>Abstract</h2><p>${result.abstract}</p><p><strong>DOI:</strong> ${result.doi}</p><p><strong>Citations:</strong> ${result.citations}</p></body></html>`;
+                        const blob = new Blob([content], { type: 'application/msword' });
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = filename;
+                        a.style.display = 'none';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
                     } else if (format === 'pdf') {
-                        content = `${result.title}\n${result.authors}\n${result.journal}, ${result.year}\n\nAbstract:\n${result.abstract}\n\nDOI: ${result.doi}\nCitations: ${result.citations}`;
-                        mimeType = 'application/pdf';
+                        // Use jsPDF for proper PDF generation
+                        const { jsPDF } = window.jspdf;
+                        const doc = new jsPDF();
+                        
+                        // Add title
+                        doc.setFontSize(16);
+                        doc.text(result.title, 20, 20);
+                        
+                        // Add authors
+                        doc.setFontSize(12);
+                        doc.text(`Authors: ${result.authors}`, 20, 35);
+                        
+                        // Add journal and year
+                        doc.text(`Journal: ${result.journal}, ${result.year}`, 20, 45);
+                        
+                        // Add abstract
+                        doc.setFontSize(11);
+                        doc.text('Abstract:', 20, 60);
+                        const abstractLines = doc.splitTextToSize(result.abstract, 170);
+                        doc.text(abstractLines, 20, 70);
+                        
+                        // Add DOI and citations
+                        doc.setFontSize(10);
+                        const yPosition = 70 + (abstractLines.length * 7) + 10;
+                        doc.text(`DOI: ${result.doi}`, 20, yPosition);
+                        doc.text(`Citations: ${result.citations}`, 20, yPosition + 7);
+                        
+                        doc.save(filename);
                     }
-                    
-                    const blob = new Blob([content], { type: mimeType });
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = filename;
-                    a.style.display = 'none';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(url);
                     
                     console.log(`Downloaded ${filename} successfully`);
                 } catch (error) {
