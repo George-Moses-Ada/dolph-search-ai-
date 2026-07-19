@@ -1357,7 +1357,8 @@
             );
         }
 
-        ReactDOM.render(<SearchResults />, document.getElementById('root'));
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<SearchResults />);
     </script>
 </body>
 </html>
