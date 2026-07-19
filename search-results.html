@@ -89,6 +89,7 @@
             const [currentPage, setCurrentPage] = useState(1);
             const [visibleResults, setVisibleResults] = useState([]);
             const timelineRef = useRef(null);
+            const chartRef = useRef(null);
             const [displayOptionsOpen, setDisplayOptionsOpen] = useState(false);
             const [additionalFiltersOpen, setAdditionalFiltersOpen] = useState(false);
 
@@ -204,9 +205,10 @@
                 if (timelineRef.current) {
                     const ctx = timelineRef.current.getContext('2d');
                     
-                    // Destroy existing chart if it exists and has destroy method
-                    if (window.timelineChart && typeof window.timelineChart.destroy === 'function') {
-                        window.timelineChart.destroy();
+                    // Destroy existing chart if it exists
+                    if (chartRef.current) {
+                        chartRef.current.destroy();
+                        chartRef.current = null;
                     }
                     
                     // Only create chart if we have results
@@ -228,7 +230,7 @@
                         const counts = years.map(year => yearCounts[year]);
                         
                         // Create new chart
-                        window.timelineChart = new Chart(ctx, {
+                        chartRef.current = new Chart(ctx, {
                             type: 'bar',
                             data: {
                                 labels: years,
