@@ -423,6 +423,16 @@
 
             const downloadPaper = (result, format) => {
                 try {
+                    if (!format) {
+                        // If no format selected, open the paper URL instead
+                        if (result.url) {
+                            window.open(result.url, '_blank');
+                        } else {
+                            alert('No download format selected and no paper URL available.');
+                        }
+                        return;
+                    }
+
                     const filename = `${result.title.replace(/[^a-z0-9\s]/gi, '_').toLowerCase()}.${format}`;
                     
                     let content = '';
@@ -906,7 +916,10 @@
                                                         <div className="flex items-start gap-4 w-full">
                                                             <input type="checkbox" className="mt-1" aria-label={`Select result ${result.id}`} />
                                                             <div className="flex-1">
-                                                                <h3 className="text-base lg:text-lg font-semibold text-[#111827] mb-2 hover:text-blue-600 cursor-pointer">
+                                                                <h3 
+                                                                    className="text-base lg:text-lg font-semibold text-[#111827] mb-2 hover:text-blue-600 cursor-pointer"
+                                                                    onClick={() => window.open(result.url || '#', '_blank')}
+                                                                >
                                                                     {result.title}
                                                                 </h3>
                                                                 {displayOptions.showAuthors && (
