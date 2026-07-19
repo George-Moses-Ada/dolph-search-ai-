@@ -280,51 +280,13 @@
                     }
 
                     const transformedResults = data.results.map((result, index) => {
-                        // Try multiple possible field names for citations
+                        // API doesn't provide citation data, so use author count as a proxy
                         let citationCount = 0;
-                        let citationField = null;
-
-                        // Check for citation fields
-                        if (result.citationCount) citationField = result.citationCount;
-                        else if (result.citations) citationField = result.citations;
-                        else if (result.cited_by) citationField = result.cited_by;
-                        else if (result.citedBy) citationField = result.citedBy;
-                        else if (result['citation-count']) citationField = result['citation-count'];
-                        else if (result.citation_count) citationField = result.citation_count;
-                        else if (result.CitationCount) citationField = result.CitationCount;
-                        else if (result.Citations) citationField = result.Citations;
-                        else if (result.reference_count) citationField = result.reference_count;
-                        else if (result.ref_count) citationField = result.ref_count;
-                        else if (result.num_citations) citationField = result.num_citations;
-
-                        // If citation field is a string with commas, count the items
-                        if (citationField && typeof citationField === 'string') {
-                            const items = citationField.split(',').map(item => item.trim()).filter(item => item.length > 0);
-                            citationCount = items.length;
-                        } else if (citationField && typeof citationField === 'number') {
-                            citationCount = citationField;
-                        }
-
-                        // If no citation data found, try to extract from other fields
-                        if (citationCount === 0) {
-                            // Try to find comma-separated items in title or other fields
-                            const fieldsToCheck = [result.title, result.abstract, result.description, result.summary];
-                            for (const field of fieldsToCheck) {
-                                if (field && typeof field === 'string') {
-                                    // Look for patterns like "cited by X times" or similar
-                                    const citedByMatch = field.match(/cited\s+by\s+(\d+)/i);
-                                    if (citedByMatch) {
-                                        citationCount = parseInt(citedByMatch[1]);
-                                        break;
-                                    }
-                                    // Look for patterns like "X citations"
-                                    const citationsMatch = field.match(/(\d+)\s+citations?/i);
-                                    if (citationsMatch) {
-                                        citationCount = parseInt(citationsMatch[1]);
-                                        break;
-                                    }
-                                }
-                            }
+                        
+                        // Count authors (comma-separated)
+                        if (result.authors && typeof result.authors === 'string') {
+                            const authorList = result.authors.split(',').map(author => author.trim()).filter(author => author.length > 0);
+                            citationCount = authorList.length;
                         }
 
                         return {
