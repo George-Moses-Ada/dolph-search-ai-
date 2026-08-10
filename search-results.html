@@ -77,7 +77,7 @@
                 showDOI: true,
                 showKeywords: true,
                 showCitations: true,
-                resultsPerPage: 1000
+                resultsPerPage: 10000
             });
             const [selectedFilters, setSelectedFilters] = useState({
                 publicationDate: null,
@@ -974,8 +974,8 @@
                                     <button 
                                         onClick={() => {
                                             const subject = encodeURIComponent(`Research Papers: ${query}`);
-                                            const body = encodeURIComponent(`I found these research papers on "${query}":\n\n${filteredResults.map(r => `- ${r.title} (${r.url})`).join('\n')}`);
-                                            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+                                            const body = encodeURIComponent(`I found these research papers on "${query}":\n\n${filteredResults.slice(0, 50).map(r => `- ${r.title}\n  ${r.url}`).join('\n\n')}`);
+                                            window.open(`mailto:?subject=${subject}&body=${body}`, '_self');
                                         }}
                                         className="text-sm text-gray-600 hover:text-gray-900 px-2 py-1"
                                     >
@@ -999,15 +999,12 @@
                                     <button 
                                         onClick={() => {
                                             const shareUrl = window.location.href;
-                                            if (navigator.share) {
-                                                navigator.share({
-                                                    title: `Research Papers: ${query}`,
-                                                    url: shareUrl
-                                                });
-                                            } else {
-                                                navigator.clipboard.writeText(shareUrl);
+                                            navigator.clipboard.writeText(shareUrl).then(() => {
                                                 alert('Link copied to clipboard!');
-                                            }
+                                            }).catch(err => {
+                                                console.error('Failed to copy link:', err);
+                                                alert('Failed to copy link. Please try again.');
+                                            });
                                         }}
                                         className="text-sm text-gray-600 hover:text-gray-900 px-2 py-1"
                                     >
@@ -1333,6 +1330,7 @@
                                             <option value={50}>50</option>
                                             <option value={100}>100</option>
                                             <option value={1000}>1000</option>
+                                            <option value={10000}>10000</option>
                                         </select>
                                     </div>
 
