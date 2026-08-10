@@ -77,7 +77,7 @@
                 showDOI: true,
                 showKeywords: true,
                 showCitations: true,
-                resultsPerPage: 20
+                resultsPerPage: 1000
             });
             const [selectedFilters, setSelectedFilters] = useState({
                 publicationDate: null,
@@ -482,28 +482,78 @@
                         const { jsPDF } = window.jspdf;
                         const doc = new jsPDF();
                         
+                        let yPosition = 20;
+                        
                         // Add title
                         doc.setFontSize(16);
-                        doc.text(result.title, 20, 20);
+                        doc.setFont('helvetica', 'bold');
+                        const titleLines = doc.splitTextToSize(result.title, 170);
+                        doc.text(titleLines, 20, yPosition);
+                        yPosition += titleLines.length * 10 + 10;
                         
                         // Add authors
                         doc.setFontSize(12);
-                        doc.text(`Authors: ${result.authors}`, 20, 35);
+                        doc.setFont('helvetica', 'normal');
+                        doc.text(`Authors: ${result.authors}`, 20, yPosition);
+                        yPosition += 10;
                         
                         // Add journal and year
-                        doc.text(`Journal: ${result.journal}, ${result.year}`, 20, 45);
+                        doc.text(`Journal: ${result.journal}, ${result.year}`, 20, yPosition);
+                        yPosition += 10;
+                        
+                        // Add article type
+                        doc.text(`Article Type: ${result.articleType}`, 20, yPosition);
+                        yPosition += 10;
+                        
+                        // Add source
+                        doc.text(`Source: ${result.source}`, 20, yPosition);
+                        yPosition += 10;
                         
                         // Add abstract
                         doc.setFontSize(11);
-                        doc.text('Abstract:', 20, 60);
-                        const abstractLines = doc.splitTextToSize(result.abstract, 170);
-                        doc.text(abstractLines, 20, 70);
+                        doc.setFont('helvetica', 'bold');
+                        doc.text('Abstract:', 20, yPosition);
+                        yPosition += 8;
+                        doc.setFont('helvetica', 'normal');
+                        const abstractLines = doc.splitTextToSize(result.abstract || 'No abstract available', 170);
+                        doc.text(abstractLines, 20, yPosition);
+                        yPosition += abstractLines.length * 7 + 10;
+                        
+                        // Add keywords
+                        if (result.keywords && result.keywords.length > 0) {
+                            doc.setFont('helvetica', 'bold');
+                            doc.text('Keywords:', 20, yPosition);
+                            yPosition += 8;
+                            doc.setFont('helvetica', 'normal');
+                            const keywordsText = result.keywords.join(', ');
+                            const keywordLines = doc.splitTextToSize(keywordsText, 170);
+                            doc.text(keywordLines, 20, yPosition);
+                            yPosition += keywordLines.length * 7 + 10;
+                        }
                         
                         // Add DOI and citations
                         doc.setFontSize(10);
-                        const yPosition = 70 + (abstractLines.length * 7) + 10;
                         doc.text(`DOI: ${result.doi}`, 20, yPosition);
-                        doc.text(`Citations: ${result.citations}`, 20, yPosition + 7);
+                        yPosition += 7;
+                        doc.text(`Citations: ${result.citations}`, 20, yPosition);
+                        yPosition += 10;
+                        
+                        // Add paper URL
+                        doc.setFont('helvetica', 'bold');
+                        doc.text('Full Paper URL:', 20, yPosition);
+                        yPosition += 8;
+                        doc.setFont('helvetica', 'normal');
+                        doc.setTextColor(0, 0, 255);
+                        const urlLines = doc.splitTextToSize(result.url, 170);
+                        doc.text(urlLines, 20, yPosition);
+                        doc.setTextColor(0, 0, 0);
+                        yPosition += urlLines.length * 7 + 10;
+                        
+                        // Add note about full content
+                        doc.setFontSize(9);
+                        doc.setTextColor(128, 128, 128);
+                        doc.setFont('helvetica', 'italic');
+                        doc.text('Note: This PDF contains metadata available from the search API. For the full paper content, please visit the URL above.', 20, yPosition);
                         
                         doc.save(filename);
                     }
@@ -906,10 +956,63 @@
                             <div className="max-w-5xl mx-auto p-6">
                                 {/* Search Toolbar */}
                                 <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4 flex items-center gap-2 flex-wrap">
-                                    <button className="text-sm text-gray-600 hover:text-gray-900 px-2 py-1">Save</button>
-                                    <button className="text-sm text-gray-600 hover:text-gray-900 px-2 py-1">Email</button>
-                                    <button className="text-sm text-gray-600 hover:text-gray-900 px-2 py-1">Export</button>
-                                    <button className="text-sm text-gray-600 hover:text-gray-900 px-2 py-1">Share</button>
+                                    <button 
+                                        onClick={() => {
+                                            const savedPapers = JSON.parse(localStorage.getItem('savedPapers') || '[]');
+                                            filteredResults.forEach(result => {
+                                                if (!savedPapers.find(p => p.id === result.id)) {
+                                                    savedPapers.push(result);
+                                                }
+                                            });
+                                            localStorage.setItem('savedPapers', JSON.stringify(savedPapers));
+                                            alert('Papers saved successfully!');
+                                        }}
+                                        className="text-sm text-gray-600 hover:text-gray-900 px-2 py-1"
+                                    >
+                                        Save
+                                    </button>
+                                    <button 
+                                        onClick={() => {
+                                            const subject = encodeURIComponent(`Research Papers: ${query}`);
+                                            const body = encodeURIComponent(`I found these research papers on "${query}":\n\n${filteredResults.map(r => `- ${r.title} (${r.url})`).join('\n')}`);
+                                            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+                                        }}
+                                        className="text-sm text-gray-600 hover:text-gray-900 px-2 py-1"
+                                    >
+                                        Email
+                                    </button>
+                                    <button 
+                                        onClick={() => {
+                                            const content = filteredResults.map(r => `${r.title}\n${r.authors}\n${r.journal}, ${r.year}\n${r.url}\n`).join('\n\n');
+                                            const blob = new Blob([content], { type: 'text/plain' });
+                                            const url = window.URL.createObjectURL(blob);
+                                            const a = document.createElement('a');
+                                            a.href = url;
+                                            a.download = `research_papers_${query.replace(/\s+/g, '_')}.txt`;
+                                            a.click();
+                                            window.URL.revokeObjectURL(url);
+                                        }}
+                                        className="text-sm text-gray-600 hover:text-gray-900 px-2 py-1"
+                                    >
+                                        Export
+                                    </button>
+                                    <button 
+                                        onClick={() => {
+                                            const shareUrl = window.location.href;
+                                            if (navigator.share) {
+                                                navigator.share({
+                                                    title: `Research Papers: ${query}`,
+                                                    url: shareUrl
+                                                });
+                                            } else {
+                                                navigator.clipboard.writeText(shareUrl);
+                                                alert('Link copied to clipboard!');
+                                            }
+                                        }}
+                                        className="text-sm text-gray-600 hover:text-gray-900 px-2 py-1"
+                                    >
+                                        Share
+                                    </button>
                                     <div className="flex-1"></div>
                                     <select 
                                         value={sortOption}
@@ -1005,20 +1108,29 @@
                                                                 <div className="flex flex-wrap gap-2 lg:hidden">
                                                                     <button 
                                                                         onClick={() => window.open(result.url || '#', '_blank')}
-                                                                        className="text-sm text-blue-600 hover:text-blue-700 px-3 py-1 border border-blue-600 rounded"
+                                                                        className="bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-md hover:shadow-lg"
                                                                     >
-                                                                        View Paper
+                                        <span className="flex items-center gap-2">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            View Paper
+                                        </span>
                                                                     </button>
                                                                     <div className="relative">
                                                                         <select 
                                                                             onChange={(e) => downloadPaper(result, e.target.value)}
-                                            className="text-sm text-blue-600 hover:text-blue-700 px-3 py-1 border border-blue-600 rounded appearance-none cursor-pointer"
+                                            className="bg-gradient-to-r from-green-600 to-green-700 text-white text-sm font-medium px-4 py-2 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-md hover:shadow-lg appearance-none cursor-pointer pr-8"
                                         >
-                                            <option value="">Download Paper ▼</option>
+                                            <option value="">Download</option>
                                             <option value="pdf">PDF</option>
                                             <option value="txt">TXT</option>
                                             <option value="doc">DOC</option>
                                         </select>
+                                        <svg className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -1026,20 +1138,29 @@
                                                         <div className="hidden lg:flex flex-col gap-2">
                                                             <button 
                                                                 onClick={() => window.open(result.url || '#', '_blank')}
-                                                                className="text-sm text-blue-600 hover:text-blue-700"
+                                                                className="bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-md hover:shadow-lg"
                                                             >
-                                                                View Paper
+                                        <span className="flex items-center gap-2">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            View Paper
+                                        </span>
                                                             </button>
                                                             <div className="relative">
                                                                 <select 
                                                                     onChange={(e) => downloadPaper(result, e.target.value)}
-                                                                    className="text-sm text-blue-600 hover:text-blue-700 appearance-none cursor-pointer"
+                                                                    className="bg-gradient-to-r from-green-600 to-green-700 text-white text-sm font-medium px-4 py-2 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-md hover:shadow-lg appearance-none cursor-pointer pr-8"
                                                                 >
-                                                                    <option value="">Download Paper ▼</option>
+                                                                    <option value="">Download</option>
                                                                     <option value="pdf">PDF</option>
                                                                     <option value="txt">TXT</option>
                                                                     <option value="doc">DOC</option>
                                                                 </select>
+                                                                <svg className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                                </svg>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1211,6 +1332,7 @@
                                             <option value={20}>20</option>
                                             <option value={50}>50</option>
                                             <option value={100}>100</option>
+                                            <option value={1000}>1000</option>
                                         </select>
                                     </div>
 
