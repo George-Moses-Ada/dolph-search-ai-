@@ -54,7 +54,8 @@ class SearchService {
             journal: article.source || '',
             publicationDate: article.pubdate || '',
             url: `https://pubmed.ncbi.nlm.nih.gov/${article.uid}/`,
-            doi: article.elocationid || ''
+            doi: article.elocationid || '',
+            citations: 0 // PubMed esummary doesn't provide citation counts
         };
     }
 
@@ -125,7 +126,8 @@ class SearchService {
                         journal: 'arXiv',
                         publicationDate: Array.isArray(entry.published) ? entry.published[0]?.split('T')[0] : (entry.published?.split('T')[0] || ''),
                         url: entryId || '',
-                        doi: entry['arxiv:doi']?.[0] || ''
+                        doi: entry['arxiv:doi']?.[0] || '',
+                        citations: 0 // arXiv doesn't provide citation counts in basic API
                     };
                 });
 
@@ -176,7 +178,8 @@ class SearchService {
                         journal: paper.venue || paper.journal?.name || '',
                         publicationDate: paper.year?.toString() || '',
                         url: paper.url || '',
-                        doi: paper.doi || ''
+                        doi: paper.doi || '',
+                        citations: paper.citationCount || 0
                     }));
                 } catch (error) {
                     if (error.response && error.response.status === 429) {
@@ -231,7 +234,8 @@ class SearchService {
                 journal: result.journalTitle || '',
                 publicationDate: result.pubYear || '',
                 url: `https://europepmc.org/article/${result.id}`,
-                doi: result.doi || ''
+                doi: result.doi || '',
+                citations: result.citedByCount || 0
             }));
         } catch (error) {
             console.error('Europe PMC API error:', error.message);
@@ -271,7 +275,8 @@ class SearchService {
                     journal: Array.isArray(item['container-title']) ? item['container-title'][0] : (item['container-title'] || ''),
                     publicationDate: item['published-print']?.['date-parts']?.[0]?.[0]?.toString() || '',
                     url: item.URL || '',
-                    doi: item.DOI || ''
+                    doi: item.DOI || '',
+                    citations: 0 // CrossRef basic API doesn't provide citation counts
                 };
             });
         } catch (error) {
@@ -314,7 +319,8 @@ class SearchService {
                 journal: entry['prism:publicationName'] || 'Nature',
                 publicationDate: entry['prism:publicationDate'] || entry.published || '',
                 url: entry.id || entry.link || '',
-                doi: entry['prism:doi'] || entry.doi || ''
+                doi: entry['prism:doi'] || entry.doi || '',
+                citations: 0 // Nature OpenSearch doesn't provide citation counts
             }));
         } catch (error) {
             console.error('Nature API error:', error.message);
@@ -376,7 +382,8 @@ class SearchService {
                     journal: entry['prism:publicationName'] || 'Cell',
                     publicationDate: entry['prism:coverDate']?.substring(0, 4) || '',
                     url: entry['prism:url'] || entry.link?.[0]?.['@href'] || '',
-                    doi: entry['dc:identifier']?.replace('DOI:', '') || entry.doi || ''
+                    doi: entry['dc:identifier']?.replace('DOI:', '') || entry.doi || '',
+                    citations: 0 // Elsevier API doesn't provide citation counts in basic search
                 };
             });
         } catch (error) {
@@ -452,7 +459,8 @@ class SearchService {
                             journal: 'JAMA',
                             publicationDate: item.pubDate?.[0] || '',
                             url: item.link?.[0] || '',
-                            doi: item['prism:doi']?.[0] || ''
+                            doi: item['prism:doi']?.[0] || '',
+                            citations: 0 // RSS feeds don't provide citation counts
                         };
                     });
 
@@ -532,7 +540,8 @@ class SearchService {
                             journal: 'NEJM',
                             publicationDate: item.pubDate?.[0] || '',
                             url: item.link?.[0] || '',
-                            doi: item['prism:doi']?.[0] || ''
+                            doi: item['prism:doi']?.[0] || '',
+                            citations: 0 // RSS feeds don't provide citation counts
                         };
                     });
 
