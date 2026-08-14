@@ -12,7 +12,13 @@ class SearchService {
                 retmax: 500
             });
 
-            const searchResponse = await axios.get(`${searchUrl}?${searchParams}`);
+            const searchResponse = await axios.get(`${searchUrl}?${searchParams}`, {
+                headers: {
+                    'User-Agent': 'DolphSearch/1.0 (mailto:contact@example.com)'
+                },
+                timeout: 30000
+            });
+            
             const idList = searchResponse.data.esearchresult?.idlist || [];
 
             if (idList.length === 0) {
@@ -27,7 +33,12 @@ class SearchService {
                 retmode: 'json'
             });
 
-            const fetchResponse = await axios.get(`${fetchUrl}?${fetchParams}`);
+            const fetchResponse = await axios.get(`${fetchUrl}?${fetchParams}`, {
+                headers: {
+                    'User-Agent': 'DolphSearch/1.0 (mailto:contact@example.com)'
+                },
+                timeout: 30000
+            });
             const result = fetchResponse.data.result;
             
             // Convert result object to array, excluding the 'uids' key
@@ -38,6 +49,10 @@ class SearchService {
             return articles.map(article => this.parsePubMedArticle(article));
         } catch (error) {
             console.error('PubMed API error:', error.message);
+            if (error.response) {
+                console.error('PubMed API response status:', error.response.status);
+                console.error('PubMed API response data:', error.response.data);
+            }
             return [];
         }
     }
