@@ -26,6 +26,7 @@
             const [dropdownOpen, setDropdownOpen] = useState(false);
             const dropdownRef = useRef(null);
             const [user, setUser] = useState(null);
+            const [recentSearches, setRecentSearches] = useState([]);
 
             const searchOptions = ['All Search', 'PubMed', 'arXiv', 'Semantic Scholar', 'Europe PMC', 'CrossRef', 'Scopus', 'Nature', 'Cell', 'JAMA', 'NEJM'];
 
@@ -40,6 +41,12 @@
                 const userData = localStorage.getItem('user');
                 if (userData) {
                     setUser(JSON.parse(userData));
+                }
+
+                // Load recent searches from localStorage
+                const savedSearches = localStorage.getItem('recentSearches');
+                if (savedSearches) {
+                    setRecentSearches(JSON.parse(savedSearches));
                 }
 
                 const handleClickOutside = (event) => {
@@ -104,9 +111,33 @@
                     return;
                 }
                 
+                // Save to recent searches
+                const newSearch = {
+                    query: query,
+                    types: searchTypes,
+                    timestamp: new Date().toISOString()
+                };
+                
+                setRecentSearches(prev => {
+                    const updated = [newSearch, ...prev.filter(s => s.query !== query)].slice(0, 10);
+                    localStorage.setItem('recentSearches', JSON.stringify(updated));
+                    return updated;
+                });
+                
                 // Redirect to search results
                 const types = searchTypes.join(',');
                 window.location.href = `search-results.html?query=${encodeURIComponent(query)}&types=${encodeURIComponent(types)}`;
+            };
+
+            const handleRecentSearchClick = (search) => {
+                setSearchTypes(search.types);
+                const types = search.types.join(',');
+                window.location.href = `search-results.html?query=${encodeURIComponent(search.query)}&types=${encodeURIComponent(types)}`;
+            };
+
+            const clearRecentSearches = () => {
+                setRecentSearches([]);
+                localStorage.removeItem('recentSearches');
             };
 
             return (
@@ -135,7 +166,33 @@
                             </div>
 
                             {/* Navigation */}
-                            <nav className="flex-1 px-2 py-2">
+                            <nav className="flex-1 px-2 py-2 overflow-y-auto">
+                                {/* Recent Searches */}
+                                {recentSearches.length > 0 && (
+                                    <div className="mb-4">
+                                        <div className="flex items-center justify-between px-3 py-2 mb-1">
+                                            <span className="text-xs font-medium text-[#6b7280]">Recent searches</span>
+                                            <button 
+                                                onClick={clearRecentSearches}
+                                                className="text-xs text-[#6b7280] hover:text-[#0d0d0d]"
+                                            >
+                                                Clear
+                                            </button>
+                                        </div>
+                                        {recentSearches.map((search, index) => (
+                                            <button
+                                                key={index}
+                                                onClick={() => handleRecentSearchClick(search)}
+                                                className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-200 rounded-lg text-left group"
+                                            >
+                                                <svg className="w-4 h-4 text-[#6b7280] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                <span className="text-sm text-[#0d0d0d] truncate flex-1">{search.query}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
                             </nav>
 
                             {/* Bottom section */}
