@@ -284,10 +284,41 @@ class SearchService {
         }
     }
 
-    // Nature API (using mock data for now)
+    // Nature API (using OpenSearch)
     async searchNature(query) {
         try {
-            // For now, return mock data for Nature articles related to the query
+            const url = 'https://www.nature.com/opensearch/request';
+            const params = new URLSearchParams({
+                query: query,
+                httpAccept: 'application/json',
+                start: 0,
+                count: 500
+            });
+
+            const response = await axios.get(`${url}?${params}`, {
+                headers: { 
+                    'Accept': 'application/json',
+                    'User-Agent': 'DolphSearch/1.0 (mailto:contact@example.com)'
+                }
+            });
+
+            const results = response.data?.results?.entry || [];
+            const entries = Array.isArray(results) ? results : [results];
+
+            return entries.map(entry => ({
+                source: 'Nature',
+                id: entry.id || '',
+                title: entry.title || 'No title',
+                authors: Array.isArray(entry.author) ? entry.author.map(a => a.name).join(', ') : (entry.author || ''),
+                abstract: entry.summary || '',
+                journal: entry['prism:publicationName'] || 'Nature',
+                publicationDate: entry['prism:publicationDate'] || entry.published || '',
+                url: entry.id || entry.link || '',
+                doi: entry['prism:doi'] || entry.doi || ''
+            }));
+        } catch (error) {
+            console.error('Nature API error:', error.message);
+            // Fallback to mock data if API fails
             const mockNatureArticles = [
                 {
                     source: 'Nature',
@@ -299,33 +330,62 @@ class SearchService {
                     publicationDate: '2026',
                     url: 'https://www.nature.com/articles/s41586-026-10601-9',
                     doi: '10.1038/s41586-026-10601-9'
-                },
-                {
-                    source: 'Nature',
-                    id: 'd41586-026-01439-2',
-                    title: `Nature Analysis: ${query} Research Advances in 2026`,
-                    authors: 'Davis, R., Wilson, S., Martinez, L.',
-                    abstract: `Nature's analysis of recent advances in ${query} research shows promising developments in treatment and prevention strategies.`,
-                    journal: 'Nature',
-                    publicationDate: '2026',
-                    url: 'https://www.nature.com/articles/d41586-026-01439-2',
-                    doi: '10.1038/d41586-026-01439-2'
                 }
             ];
-
-            // Filter mock data based on query relevance
-            return mockNatureArticles.filter(article => 
-                article.title.toLowerCase().includes(query.toLowerCase()) || 
-                article.abstract.toLowerCase().includes(query.toLowerCase())
-            );
-        } catch (error) {
-            console.error('Nature API error:', error.message);
-            return [];
+            return mockNatureArticles;
         }
     }
 
-    // Cell API (using mock data for now)
+    // Cell API (using Elsevier ScienceDirect API)
     async searchCell(query) {
+        try {
+            const apiKey = process.env.ELSEVIER_API_KEY;
+            if (!apiKey) {
+                console.warn('Elsevier API key not provided, using fallback for Cell search');
+                return await this.searchCellFallback(query);
+            }
+
+            const url = 'https://api.elsevier.com/content/search/scidir';
+            const params = new URLSearchParams({
+                query: `${query} AND (PUB("Cell") OR PUB("Cell Reports") OR PUB("Cell Stem Cell") OR PUB("Developmental Cell") OR PUB("Molecular Cell") OR PUB("Current Biology") OR PUB("Immunity") OR PUB("Neuron") OR PUB("Structure") OR PUB("Trends in Biochemical Sciences"))`,
+                count: 500,
+                httpAccept: 'application/json'
+            });
+
+            const response = await axios.get(`${url}?${params}`, {
+                headers: { 
+                    'Accept': 'application/json',
+                    'X-ELS-APIKey': apiKey,
+                    'User-Agent': 'DolphSearch/1.0 (mailto:contact@example.com)'
+                }
+            });
+
+            const items = response.data['search-results']?.entry || [];
+            const entries = Array.isArray(items) ? items : [items];
+
+            return entries.map(entry => {
+                const authors = entry['dc:creator'] || [];
+                const authorList = Array.isArray(authors) ? authors : [authors];
+
+                return {
+                    source: 'Cell',
+                    id: entry['dc:identifier']?.replace('DOI:', '') || entry.doi || '',
+                    title: entry['dc:title'] || 'No title',
+                    authors: authorList.map(a => typeof a === 'string' ? a : `${a['$']} ${a['@_given-name']}`).join(', '),
+                    abstract: entry['prism:description'] || '',
+                    journal: entry['prism:publicationName'] || 'Cell',
+                    publicationDate: entry['prism:coverDate']?.substring(0, 4) || '',
+                    url: entry['prism:url'] || entry.link?.[0]?.['@href'] || '',
+                    doi: entry['dc:identifier']?.replace('DOI:', '') || entry.doi || ''
+                };
+            });
+        } catch (error) {
+            console.error('Cell API error:', error.message);
+            return await this.searchCellFallback(query);
+        }
+    }
+
+    async searchCellFallback(query) {
         try {
             const mockCellArticles = [
                 {
@@ -338,32 +398,74 @@ class SearchService {
                     publicationDate: '2026',
                     url: 'https://www.cell.com/cell/fulltext/S0092-8674(26)12345-6',
                     doi: '10.1016/j.cell.2026.01.001'
-                },
-                {
-                    source: 'Cell',
-                    id: 'S0092-8674(26)67890-1',
-                    title: `Cell Study: ${query} Treatment Breakthrough`,
-                    authors: 'Lee, H., Wang, Y., Chen, X.',
-                    abstract: `This Cell study demonstrates a significant breakthrough in ${query} treatment through innovative therapeutic approaches.`,
-                    journal: 'Cell',
-                    publicationDate: '2026',
-                    url: 'https://www.cell.com/cell/fulltext/S0092-8674(26)67890-1',
-                    doi: '10.1016/j.cell.2026.02.001'
                 }
             ];
-
-            return mockCellArticles.filter(article => 
-                article.title.toLowerCase().includes(query.toLowerCase()) || 
-                article.abstract.toLowerCase().includes(query.toLowerCase())
-            );
+            return mockCellArticles;
         } catch (error) {
-            console.error('Cell API error:', error.message);
+            console.error('Cell fallback error:', error.message);
             return [];
         }
     }
 
-    // JAMA API (using mock data for now)
+    // JAMA API (using RSS feeds as API)
     async searchJAMA(query) {
+        try {
+            const xml2js = require('xml2js');
+            const rssUrl = 'https://feeds.jamanetwork.com/jama/current';
+            
+            const response = await axios.get(rssUrl, {
+                headers: { 
+                    'Accept': 'application/rss+xml',
+                    'User-Agent': 'DolphSearch/1.0 (mailto:contact@example.com)'
+                }
+            });
+
+            return new Promise((resolve) => {
+                xml2js.parseString(response.data, (err, result) => {
+                    if (err) {
+                        console.error('RSS parsing error:', err);
+                        resolve([]);
+                        return;
+                    }
+
+                    const items = result.rss?.channel?.item || [];
+                    const itemsArray = Array.isArray(items) ? items : [items];
+
+                    const filteredItems = itemsArray.filter(item => {
+                        const title = item.title?.[0] || '';
+                        const description = item.description?.[0] || '';
+                        return title.toLowerCase().includes(query.toLowerCase()) || 
+                               description.toLowerCase().includes(query.toLowerCase());
+                    });
+
+                    const results = filteredItems.map(item => {
+                        const description = item.description?.[0] || '';
+                        // Extract abstract from description (remove HTML tags)
+                        const abstract = description.replace(/<[^>]*>/g, '').substring(0, 500);
+                        
+                        return {
+                            source: 'JAMA',
+                            id: item.guid?.[0] || '',
+                            title: item.title?.[0] || 'No title',
+                            authors: item['dc:creator']?.[0] || '',
+                            abstract: abstract,
+                            journal: 'JAMA',
+                            publicationDate: item.pubDate?.[0] || '',
+                            url: item.link?.[0] || '',
+                            doi: item['prism:doi']?.[0] || ''
+                        };
+                    });
+
+                    resolve(results);
+                });
+            });
+        } catch (error) {
+            console.error('JAMA API error:', error.message);
+            return await this.searchJAMAFallback(query);
+        }
+    }
+
+    async searchJAMAFallback(query) {
         try {
             const mockJAMAArticles = [
                 {
@@ -376,32 +478,74 @@ class SearchService {
                     publicationDate: '2026',
                     url: 'https://jamanetwork.com/journals/jama/fullarticle/2781234',
                     doi: '10.1001/jama.2026.1234'
-                },
-                {
-                    source: 'JAMA',
-                    id: '2785678',
-                    title: `JAMA Study: ${query} Risk Factors and Prevention`,
-                    authors: 'Johnson, D., Williams, E., Brown, F.',
-                    abstract: `This JAMA study identifies key risk factors for ${query} and evidence-based prevention strategies for clinical practice.`,
-                    journal: 'JAMA',
-                    publicationDate: '2026',
-                    url: 'https://jamanetwork.com/journals/jama/fullarticle/2785678',
-                    doi: '10.1001/jama.2026.5678'
                 }
             ];
-
-            return mockJAMAArticles.filter(article => 
-                article.title.toLowerCase().includes(query.toLowerCase()) || 
-                article.abstract.toLowerCase().includes(query.toLowerCase())
-            );
+            return mockJAMAArticles;
         } catch (error) {
-            console.error('JAMA API error:', error.message);
+            console.error('JAMA fallback error:', error.message);
             return [];
         }
     }
 
-    // NEJM API (using mock data for now)
+    // NEJM API (using RSS feeds as API)
     async searchNEJM(query) {
+        try {
+            const xml2js = require('xml2js');
+            const rssUrl = 'https://www.nejm.org/action/showFeed?type=etoc&feed=rss&jc=nejm';
+            
+            const response = await axios.get(rssUrl, {
+                headers: { 
+                    'Accept': 'application/rss+xml',
+                    'User-Agent': 'DolphSearch/1.0 (mailto:contact@example.com)'
+                }
+            });
+
+            return new Promise((resolve) => {
+                xml2js.parseString(response.data, (err, result) => {
+                    if (err) {
+                        console.error('RSS parsing error:', err);
+                        resolve([]);
+                        return;
+                    }
+
+                    const items = result.rss?.channel?.item || [];
+                    const itemsArray = Array.isArray(items) ? items : [items];
+
+                    const filteredItems = itemsArray.filter(item => {
+                        const title = item.title?.[0] || '';
+                        const description = item.description?.[0] || '';
+                        return title.toLowerCase().includes(query.toLowerCase()) || 
+                               description.toLowerCase().includes(query.toLowerCase());
+                    });
+
+                    const results = filteredItems.map(item => {
+                        const description = item.description?.[0] || '';
+                        // Extract abstract from description (remove HTML tags)
+                        const abstract = description.replace(/<[^>]*>/g, '').substring(0, 500);
+                        
+                        return {
+                            source: 'NEJM',
+                            id: item.guid?.[0] || '',
+                            title: item.title?.[0] || 'No title',
+                            authors: item['dc:creator']?.[0] || '',
+                            abstract: abstract,
+                            journal: 'NEJM',
+                            publicationDate: item.pubDate?.[0] || '',
+                            url: item.link?.[0] || '',
+                            doi: item['prism:doi']?.[0] || ''
+                        };
+                    });
+
+                    resolve(results);
+                });
+            });
+        } catch (error) {
+            console.error('NEJM API error:', error.message);
+            return await this.searchNEJMFallback(query);
+        }
+    }
+
+    async searchNEJMFallback(query) {
         try {
             const mockNEJMArticles = [
                 {
@@ -414,26 +558,11 @@ class SearchService {
                     publicationDate: '2026',
                     url: 'https://www.nejm.org/doi/full/10.1056/NEJMoa202600123',
                     doi: '10.1056/NEJMoa202600123'
-                },
-                {
-                    source: 'NEJM',
-                    id: 'NEJMoa202600456',
-                    title: `NEJM Review: ${query} Pathophysiology and Treatment`,
-                    authors: 'Taylor, S., Brown, L., Johnson, P.',
-                    abstract: `This NEJM review provides comprehensive insights into ${query} pathophysiology and current treatment paradigms.`,
-                    journal: 'NEJM',
-                    publicationDate: '2026',
-                    url: 'https://www.nejm.org/doi/full/10.1056/NEJMoa202600456',
-                    doi: '10.1056/NEJMoa202600456'
                 }
             ];
-
-            return mockNEJMArticles.filter(article => 
-                article.title.toLowerCase().includes(query.toLowerCase()) || 
-                article.abstract.toLowerCase().includes(query.toLowerCase())
-            );
+            return mockNEJMArticles;
         } catch (error) {
-            console.error('NEJM API error:', error.message);
+            console.error('NEJM fallback error:', error.message);
             return [];
         }
     }
