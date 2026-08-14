@@ -579,17 +579,27 @@
                     {/* Header */}
                     <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 z-50">
                         <div className="flex items-center gap-4">
+                            {/* Back Button */}
+                            <button 
+                                onClick={() => window.location.href = 'index.html'}
+                                className="p-2 hover:bg-gray-100 rounded-lg"
+                                aria-label="Go back"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                </svg>
+                            </button>
+                            
+                            {/* Logo - Same as homepage */}
                             <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.location.href = 'index.html'}>
-                                <div className="w-8 h-8 bg-[#2563eb] rounded-full flex items-center justify-center">
-                                    <span className="text-white text-sm font-bold">D</span>
-                                </div>
+                                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJAAAACQCAYAAADnRuK4AAAACXBIWXMAACxLAAAsSwGlPZapAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAOdEVYdFNvZnR3YXJlAEZpZ21hnrGWYwAAHXtJREFUeAHtXQmQHNV5/rvnvvfe1e6iE3QsIIFkswsyBgNSsDkC4UgMdmE5tqm4AnLZlYrLNilVOY5dEMeRTRxBnMjBMo4BGQIEg0QiWxiQBBiQxOpCWh0rdle72mNmd3bO7ry/Z3p2jn59TffszOx8VV27M93TMz3z9f9///HeY2AWwfM8S/44yWYlmyP915rebYUassGRLZH1N0q2GG4Mw3AwS2CghEgTxk42N9k8UCOJUYiltylCpjCUECUhECEOWhkfpIjDQg2mYWAcuA/7IHx8AkIbPsVEwGSYRqC0tQmQzQ8aSDM0QbZBgHHyN2Lw5TsNP1DhNGrO4wBVwFM5nKlz4hYIzDyPwK9qIv3dDQ6l/p+cgoTXAmN3381MgkkwnEBaiHPkFMDRI+Tio8aTZS5AJKgzTUIkGAqjSN7Nl0hCoi0AE5/5DBMEg2EogQh50EU1goy22b2P3CVDNcLMBpBIRlskQwhEiIOEaQaK8T9FCLNvX4005QJrAsJHj8L5TZuYBBSJoglEyIPuqg4k3NUR4p727YcayhAWC3C2JJwv1hrpJlBa69RDSuvkAIXw7t01i1MJ4KcheN99zHnQCV0ESrusVkjldHLwwo5UBFVD5YAnOaS+XhjS49I0EyhNnnmQJ5RR56DVqaEygQL79BEY0EoiTQSikWfH7lRkVUNlQw+JVBOIRp6ay6ouaCWRKgLRyPP0CzWhXI3QQiK1JQYUzDXyzBFYLWBd1AWtmzbxivxQPIBYH8ws50RbNfJUP1xOsC9aKaRpZCHrwgh5vJDKMGfw9I5UraWGykDnPPA3NyY7XS6Lz26HThsLfqeT72KyfvmpaWbP4Eew94Pj0I+Ps4vAXiucl6uhUQmU1j0dkGWlatFWZaDnsmRPQ6PlBo+b72FZ6CJZZxAJw1B+8QRRO+EI88zxPvjx8VMpIiEwY33ADWc3fUpaD8kRCHWPW3yMxNlRy/OUNZA4bW2WB10uvgdJowfxOEBoktn8f6/DZvG5aBwin7+DGZA6XpJAUq7rF09DDWUKdFOXXwrf8Xr4O/USJxsch6mZXBIRrzZ0662F3Y40EZ0jnlD31FCeuOZKWHfVx/ndAb8x5EEQtwd1AX7j1d1wh/jcFAeNUlFZwRPp6nomZMfCaE00lx/Q6ty0jn+kYx7/GBHHfjAYAon8/EPzW4RWZLCwYF21qvB9pCxQzkE7atan7IBap2cN/2KdH+5gdXSY83xq4xTGciAxF18IX8w89kMg3wpZc08saJ/Mc/tPQQ1lhhuvg4fqA+wGte4qmQQ4fY6Dt47FYHwKoCnxVvDAxGr/kf6ksP+WbgfcebUDbBI9pBix+Tz8BqeDEbRQMgHsqmsEAzMuHpP/shzt8/4+qKFMcPES6LzoInjY4+F7GBUFqNEgD1t3RuCFvREYGEuZGnvsNNSNPuc/19aVOe6d43F4+1gcHv6SF91UAWw28F+6AroPHIK9wjk4od89Q6DMS9JDbzKEOlXL95QNPtEN6y6+mH/R61UmD7qll/bFYP13xuDxl8MZ8iC8wZdhynt14fkvc8Dxs9L+DF2kxw09+D827VutwO7axWdSjdkWyJv9wn0166MLaCnqm2CFg2R9SUa3w8LwAYuN6RD3MzzvJyTI6EwOGCFpxyUgOB3lDk1OsXtO98Oh/gEIolC+ZAVsbKjjN6jROueJ1XngpyHBquTDE94XdEYO+0ebvlKwb0m7FSZjnKCLpAjqcvBdYsYHs9S+BkFYC8WsbAJ5sl9Uq3UpA8nS3AbdPg+scDqI" className="w-8 h-8" alt="Dolph Search" />
                                 <span className="font-semibold text-base text-gray-900">Dolph Search</span>
                             </div>
                         </div>
                         
-                        {/* Search Bar */}
-                        <div className="flex-1 max-w-2xl mx-8">
-                            <div className="relative">
+                        {/* Search Bar - Desktop only */}
+                        <div className="hidden lg:flex flex-1 max-w-2xl mx-8">
+                            <div className="relative w-full">
                                 <input
                                     type="text"
                                     value={query}
@@ -608,18 +618,9 @@
                         </div>
 
                         <div className="flex items-center gap-4">
-                            <button
-                                onClick={() => setSidebarOpen(!sidebarOpen)}
-                                className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
-                                aria-label="Toggle filters menu"
-                                aria-expanded={sidebarOpen}
-                            >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                                </svg>
-                            </button>
+                            {/* Profile/Logout - Desktop only */}
                             {user ? (
-                                <div className="flex items-center gap-3">
+                                <div className="hidden lg:flex items-center gap-3">
                                     <div className="w-8 h-8 bg-[#2563eb] rounded-full flex items-center justify-center">
                                         <span className="text-white text-sm font-medium">{user.name.charAt(0).toUpperCase()}</span>
                                     </div>
@@ -629,15 +630,27 @@
                                     </button>
                                 </div>
                             ) : (
-                                <>
+                                <div className="hidden lg:flex items-center gap-3">
                                     <a href="login.html" className="bg-[#2563eb] text-white px-4 py-2 rounded-full text-sm hover:bg-blue-600">
                                         Log in
                                     </a>
                                     <a href="signup.html" className="bg-white border border-gray-300 px-4 py-2 rounded-full text-sm hover:bg-gray-50">
                                         Sign up
                                     </a>
-                                </>
+                                </div>
                             )}
+                            
+                            {/* Menu Button */}
+                            <button
+                                onClick={() => setSidebarOpen(!sidebarOpen)}
+                                className="p-2 hover:bg-gray-100 rounded-lg"
+                                aria-label="Toggle menu"
+                                aria-expanded={sidebarOpen}
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
                         </div>
                     </header>
 
@@ -660,13 +673,68 @@
                             <div className="p-4">
                                 {/* Mobile close button */}
                                 <div className="flex items-center justify-between mb-4 lg:hidden">
-                                    <h2 className="font-semibold text-gray-900">Filters</h2>
+                                    <h2 className="font-semibold text-gray-900">Menu</h2>
                                     <button 
                                         onClick={() => setSidebarOpen(false)}
                                         className="text-gray-500 hover:text-gray-700"
                                     >
                                         ✕
                                     </button>
+                                </div>
+
+                                {/* Mobile Search Bar */}
+                                <div className="mb-6 lg:hidden">
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            value={query}
+                                            onChange={(e) => setQuery(e.target.value)}
+                                            placeholder="Search for research papers..."
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            aria-label="Search query"
+                                        />
+                                        <button
+                                            onClick={() => performSearch(query, searchTypes)}
+                                            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                                        >
+                                            Search
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Mobile Profile/Logout */}
+                                <div className="mb-6 lg:hidden">
+                                    {user ? (
+                                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                            <div className="w-8 h-8 bg-[#2563eb] rounded-full flex items-center justify-center">
+                                                <span className="text-white text-sm font-medium">{user.name.charAt(0).toUpperCase()}</span>
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                                                <p className="text-xs text-gray-500">{user.email}</p>
+                                            </div>
+                                            <button onClick={handleLogout} className="text-sm text-[#6b7280] hover:text-[#111827]">
+                                                Log out
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col gap-2">
+                                            <a href="login.html" className="bg-[#2563eb] text-white px-4 py-2 rounded-full text-sm hover:bg-blue-600 text-center">
+                                                Log in
+                                            </a>
+                                            <a href="signup.html" className="bg-white border border-gray-300 px-4 py-2 rounded-full text-sm hover:bg-gray-50 text-center">
+                                                Sign up
+                                            </a>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Mobile divider */}
+                                <div className="border-t border-gray-200 my-4 lg:hidden"></div>
+
+                                {/* Mobile close button for filters section */}
+                                <div className="flex items-center justify-between mb-4 lg:hidden">
+                                    <h2 className="font-semibold text-gray-900">Filters</h2>
                                 </div>
                                 {/* My Custom Filters */}
                                 <div className="mb-6">
