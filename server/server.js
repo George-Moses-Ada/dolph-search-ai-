@@ -73,6 +73,7 @@ app.post('/api/register', async (req, res) => {
         // Check if user already exists
         db.get('SELECT id FROM users WHERE email = ?', [email], async (err, user) => {
             if (err) {
+                console.error('Database error checking user:', err);
                 return res.status(500).json({ error: 'Database error' });
             }
 
@@ -80,34 +81,41 @@ app.post('/api/register', async (req, res) => {
                 return res.status(400).json({ error: 'User already exists' });
             }
 
-            // Hash password
-            const hashedPassword = await bcrypt.hash(password, 10);
+            try {
+                // Hash password
+                const hashedPassword = await bcrypt.hash(password, 10);
 
-            // Insert new user
-            db.run(
-                'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
-                [name, email, hashedPassword],
-                function(err) {
-                    if (err) {
-                        return res.status(500).json({ error: 'Error creating user' });
+                // Insert new user
+                db.run(
+                    'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
+                    [name, email, hashedPassword],
+                    function(err) {
+                        if (err) {
+                            console.error('Database error inserting user:', err);
+                            return res.status(500).json({ error: 'Error creating user' });
+                        }
+
+                        // Generate JWT token
+                        const token = jwt.sign(
+                            { userId: this.lastID, email },
+                            JWT_SECRET,
+                            { expiresIn: '7d' }
+                        );
+
+                        res.status(201).json({
+                            message: 'User created successfully',
+                            token,
+                            user: { id: this.lastID, name, email }
+                        });
                     }
-
-                    // Generate JWT token
-                    const token = jwt.sign(
-                        { userId: this.lastID, email },
-                        JWT_SECRET,
-                        { expiresIn: '7d' }
-                    );
-
-                    res.status(201).json({
-                        message: 'User created successfully',
-                        token,
-                        user: { id: this.lastID, name, email }
-                    });
-                }
-            );
+                );
+            } catch (hashError) {
+                console.error('Password hashing error:', hashError);
+                return res.status(500).json({ error: 'Error processing password' });
+            }
         });
     } catch (error) {
+        console.error('Server error:', error);
         res.status(500).json({ error: 'Server error' });
     }
 });
@@ -123,6 +131,7 @@ app.post('/api/login', async (req, res) => {
     try {
         db.get('SELECT * FROM users WHERE email = ?', [email], async (err, user) => {
             if (err) {
+                console.error('Database error during login:', err);
                 return res.status(500).json({ error: 'Database error' });
             }
 
@@ -130,27 +139,33 @@ app.post('/api/login', async (req, res) => {
                 return res.status(401).json({ error: 'Invalid credentials' });
             }
 
-            // Verify password
-            const isValidPassword = await bcrypt.compare(password, user.password);
+            try {
+                // Verify password
+                const isValidPassword = await bcrypt.compare(password, user.password);
 
-            if (!isValidPassword) {
-                return res.status(401).json({ error: 'Invalid credentials' });
+                if (!isValidPassword) {
+                    return res.status(401).json({ error: 'Invalid credentials' });
+                }
+
+                // Generate JWT token
+                const token = jwt.sign(
+                    { userId: user.id, email: user.email },
+                    JWT_SECRET,
+                    { expiresIn: '7d' }
+                );
+
+                res.json({
+                    message: 'Login successful',
+                    token,
+                    user: { id: user.id, name: user.name, email: user.email }
+                });
+            } catch (compareError) {
+                console.error('Password comparison error:', compareError);
+                return res.status(500).json({ error: 'Error verifying credentials' });
             }
-
-            // Generate JWT token
-            const token = jwt.sign(
-                { userId: user.id, email: user.email },
-                JWT_SECRET,
-                { expiresIn: '7d' }
-            );
-
-            res.json({
-                message: 'Login successful',
-                token,
-                user: { id: user.id, name: user.name, email: user.email }
-            });
         });
     } catch (error) {
+        console.error('Server error during login:', error);
         res.status(500).json({ error: 'Server error' });
     }
 });
