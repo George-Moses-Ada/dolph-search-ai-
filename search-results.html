@@ -587,19 +587,6 @@
                 }
             };
 
-            const highlightKeywords = (text, searchQuery) => {
-                if (!searchQuery || !text) return text;
-                const keywords = searchQuery.split(/\s+/).filter(k => k.length > 2);
-                let highlightedText = text;
-                
-                keywords.forEach(keyword => {
-                    const regex = new RegExp(`(${keyword})`, 'gi');
-                    highlightedText = highlightedText.replace(regex, '<mark style="background-color: #fef08a; padding: 2px 4px; border-radius: 2px;">$1</mark>');
-                });
-                
-                return highlightedText;
-            };
-
             return (
                 <div className="flex h-screen bg-gray-50">
                     {/* Header */}
@@ -1161,10 +1148,9 @@
                                                                 <h3 
                                                                     className="text-sm lg:text-base lg:text-lg font-semibold text-[#111827] mb-2 hover:text-blue-600 cursor-pointer"
                                                                     onClick={() => window.open(result.url || '#', '_blank')}
-                                                                    dangerouslySetInnerHTML={{
-                                                                        __html: highlightKeywords(result.title, query)
-                                                                    }}
-                                                                />
+                                                                >
+                                                                    {result.title}
+                                                                </h3>
                                                                 {displayOptions.showAuthors && (
                                                                     <p className="text-xs lg:text-sm text-gray-600 mb-2">
                                                                         {result.authors}
