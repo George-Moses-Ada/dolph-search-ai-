@@ -9,7 +9,7 @@ class SearchService {
                 db: 'pubmed',
                 term: query,
                 retmode: 'json',
-                retmax: 20
+                retmax: 500
             });
 
             const searchResponse = await axios.get(`${searchUrl}?${searchParams}`);
@@ -82,7 +82,7 @@ class SearchService {
             const params = new URLSearchParams({
                 search_query: `all:${query}`,
                 start: 0,
-                max_results: 20
+                max_results: 500
             });
 
             const response = await axios.get(`${url}?${params}`, {
@@ -141,7 +141,7 @@ class SearchService {
             let url = 'https://api.semanticscholar.org/graph/v1/paper/search';
             const params = new URLSearchParams({
                 query: query,
-                limit: 20,
+                limit: 500,
                 fields: 'paperId,title,abstract,authors,year,url,venue,journal,doi,citationCount'
             });
 
@@ -215,7 +215,7 @@ class SearchService {
                 query: query,
                 resulttype: 'core',
                 format: 'json',
-                pageSize: 20,
+                pageSize: 500,
                 cursorMark: '*'
             });
 
@@ -245,7 +245,7 @@ class SearchService {
             const url = 'https://api.crossref.org/works';
             const params = new URLSearchParams({
                 query: query,
-                rows: 20,
+                rows: 500,
                 select: 'title,author,abstract,published-print,DOI,URL,container-title'
             });
 
