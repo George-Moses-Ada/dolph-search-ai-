@@ -1021,7 +1021,7 @@
 
                         {/* Main Search Results */}
                         <main className="flex-1 overflow-y-auto w-full">
-                            <div className="max-w-5xl mx-auto p-4 lg:p-6">
+                            <div className="w-full max-w-5xl mx-auto p-4 lg:p-6">
                                 {/* Search Toolbar */}
                                 <div className="bg-white border border-gray-200 rounded-lg p-3 lg:p-4 mb-4 flex items-center gap-2 flex-wrap">
                                     <button 
@@ -1125,10 +1125,10 @@
                                 ) : (
                                     <>
                                         {/* Results list */}
-                                        <div className="space-y-3 lg:space-y-4 mb-6">
+                                        <div className="space-y-3 lg:space-y-4 mb-6 w-full">
                                             {visibleResults.map(result => (
-                                                <div key={result.id} className={`result-item bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-6`}>
-                                                    <div className="flex flex-col lg:flex-row lg:items-start gap-3 lg:gap-4">
+                                                <div key={result.id} className={`result-item bg-white rounded-lg shadow-sm border border-gray-200 p-3 lg:p-6 w-full`}>
+                                                    <div className="flex flex-col lg:flex-row lg:items-start gap-3 lg:gap-4 w-full">
                                                         <div className="flex items-start gap-3 lg:gap-4 w-full">
                                                             <input type="checkbox" className="mt-1" aria-label={`Select result ${result.id}`} />
                                                             <div className="flex-1">
@@ -1237,12 +1237,12 @@
                                         {(() => {
                                             const summary = generateSummary(query, filteredResults);
                                             return (
-                                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                                                    <h3 className="text-lg font-semibold text-blue-900 mb-2">AI Summary</h3>
-                                                    <p className="text-blue-800 mb-4">
+                                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 lg:p-6 w-full">
+                                                    <h3 className="text-base lg:text-lg font-semibold text-blue-900 mb-2">AI Summary</h3>
+                                                    <p className="text-sm lg:text-base text-blue-800 mb-4">
                                                         {summary.text}
                                                     </p>
-                                                    <div className="flex items-center gap-4 text-sm text-blue-700">
+                                                    <div className="flex flex-wrap items-center gap-2 lg:gap-4 text-xs lg:text-sm text-blue-700">
                                                         <span>Overall Confidence: {summary.confidence}%</span>
                                                         <span>Consensus: {summary.consensus}</span>
                                                         <span>Evidence Quality: {summary.quality}</span>
