@@ -153,9 +153,9 @@
                     const filtered = applyFilters(results);
                     setFilteredResults(filtered);
                     setCurrentPage(1);
-                    setVisibleResults(filtered.slice(0, displayOptions.resultsPerPage));
+                    setVisibleResults(filtered); // Show all results, no pagination
                 }
-            }, [results, selectedFilters, displayOptions.resultsPerPage]);
+            }, [results, selectedFilters]);
 
             useEffect(() => {
                 // Load display options from localStorage
@@ -293,7 +293,8 @@
                         },
                         body: JSON.stringify({ 
                             query: searchQuery, 
-                            sources: types 
+                            sources: types,
+                            limit: 10000
                         }),
                     });
 
@@ -1164,21 +1165,6 @@
                                                 </div>
                                             ))}
                                         </div>
-
-                                        {/* Load More Button */}
-                                        {visibleResults.length < filteredResults.length && (
-                                            <div className="text-center mb-6">
-                                                <button
-                                                    onClick={() => {
-                                                        const nextResults = filteredResults.slice(0, visibleResults.length + displayOptions.resultsPerPage);
-                                                        setVisibleResults(nextResults);
-                                                    }}
-                                                    className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-                                                >
-                                                    Load More Results
-                                                </button>
-                                            </div>
-                                        )}
 
                                         {/* Summary */}
                                         {(() => {
